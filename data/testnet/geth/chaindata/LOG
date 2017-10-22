@@ -1,0 +1,20 @@
+=============== Oct 20, 2017 (PDT) ===============
+13:31:31.117660 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+13:31:31.119660 db@open opening
+13:31:31.127678 version@stat F·[] S·0B[] Sc·[]
+13:31:31.206816 db@janitor F·2 G·0
+13:31:31.206816 db@open done T·87.1557ms
+13:31:31.207276 db@close closing
+13:31:31.207276 db@close done T·0s
+=============== Oct 20, 2017 (PDT) ===============
+13:31:31.218284 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+13:31:31.218796 version@stat F·[] S·0B[] Sc·[]
+13:31:31.218796 db@open opening
+13:31:31.218796 journal@recovery F·1
+13:31:31.229791 journal@recovery recovering @1
+13:31:31.241347 version@stat F·[] S·0B[] Sc·[]
+13:31:31.243848 db@janitor F·2 G·0
+13:31:31.243848 db@open done T·25.0521ms
+=============== Oct 21, 2017 (PDT) ===============
+14:02:00.961415 db@close closing
+14:02:00.961415 db@close done T·0s

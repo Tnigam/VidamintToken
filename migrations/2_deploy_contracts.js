@@ -39,7 +39,7 @@ async function liveDeploy(deployer, network,accounts) {
     tokenConf = JSON.parse(fs.readFileSync('./conf/testToken.json'));
     preBuyersConf = JSON.parse(fs.readFileSync('./conf/testPreBuyers.json'));
     foundersConf = JSON.parse(fs.readFileSync('./conf/testFounders.json'));
-    saleConf.owner = accounts[0];
+    saleConf.owner = '0xf1b5f4822ee45fa8572b32da967d606bddc802aa';
     fs.writeFileSync('./conf/testSale.json', JSON.stringify(saleConf, null, '  '));
 
     let i = 10; // We use addresses from 0-3 for actors in the tests.
@@ -91,7 +91,7 @@ async function liveDeploy(deployer, network,accounts) {
     , rate
     , cap
     , goal
-    ,wallet, {from: '0xf1b5f4822ee45fa8572b32da967d606bddc802aa'})
+    ,wallet)
     .then( async () => {
       const vidaInsta = await vidamintSale.deployed();
       token = await vidaInsta.token.call();
@@ -107,7 +107,7 @@ async function liveDeploy(deployer, network,accounts) {
     vidamintToken.at(token).then(function(instance) {
       cert=instance;
       
-      const totalSupply = getTokenBalanceOf('0xdec78142165aa09ddef6e93045a8eb18659240e4');
+      const totalSupply = getTokenBalanceOf('0xf1b5f4822ee45fa8572b32da967d606bddc802aa');
       return totalSupply;
     }).then(function(value) {
       console.log('bal',   web3.fromWei(value, 'wei').toString());

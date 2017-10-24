@@ -11,7 +11,14 @@ module.exports = function(deployer, network, accounts) {
 function latestTime() {
   return web3.eth.getBlock('latest').timestamp;
 }
-
+function getTokenBalanceOf(actor) {
+  return vidamintSale.deployed()
+  .then((sale) => sale.token.call())
+  .then((tokenAddr) => vidamintToken.at(tokenAddr))
+  .then((token) => token.balanceOf.call(actor))
+  .then((balance) => new BN(balance.valueOf(), 10))
+  .catch((err) => { throw new Error(err); });
+}
 const duration = {
   seconds: function(val) { return val},
   minutes: function(val) { return val * this.seconds(60) },
@@ -77,46 +84,52 @@ async function liveDeploy(deployer, network,accounts) {
   const wallet = saleConf.wallet;
   console.log([startTime, endTime,rate,cap,goal,wallet]);
   // uint256 _startTime, uint256 _endTime, uint256 _rate, uint256, _cap, uint256 _goal, address _wallet) 
+  let token;
   return deployer.deploy(vidamintSale
     , startTime
     , endTime 
     , rate
     , cap
     , goal
-    , wallet)
+    ,wallet, {from: '0xf1b5f4822ee45fa8572b32da967d606bddc802aa'})
     .then( async () => {
       const vidaInsta = await vidamintSale.deployed();
-      const token = await vidaInsta.token.call();
+      token = await vidaInsta.token.call();
       console.log('Token Address', token);
-      web3.eth.getAccounts(function(error, accounts) {
-        if (error) {
-          console.log(error);
-        }
-  
-        var account = accounts[0];
-  
-        vidamintToken.deployed().then(function(instance) {
-          tutorialTokenInstance = instance;
-  
-          return tutorialTokenInstance.balanceOf(account);
-        }).then(function(result) {
-          balance = result.c[0];
-          console.log('balance: ' +balance);
-         
-        }).catch(function(err) {
-          console.log(err.message);
-        });
-      });
+      return vidaInsta;
+     }).then((vidamintSale) => {
+       
+      vidamintSale.distributePreBuyersRewards(
+      preBuyers,
+      preBuyersTokens
+    )
+    var cert;
+    vidamintToken.at(token).then(function(instance) {
+      cert=instance;
+      
+      const totalSupply = getTokenBalanceOf('0xdec78142165aa09ddef6e93045a8eb18659240e4');
+      return totalSupply;
+    }).then(function(value) {
+      console.log('bal',   web3.fromWei(value, 'wei').toString());
     });
-    
-   
+  }); 
+  
+  }  
     /* .then(() => vidamintSale.deployed())
     .then((vidamintSale) => vidamintSale.distributePreBuyersRewards(
       preBuyers,
       preBuyersTokens
-    )); */
+    )); 
+    
+     var cert;
+      vidamintToken.at(token).then(function(instance) {
+        cert=instance;
+        return cert.balanceOf('0xf1b5f4822ee45fa8572b32da967d606bddc802aa');
+      }).then(function(value) {
+        console.log('bal', value);
+      });*/
   
-  }
+ 
 
 /*createTokenContract
 

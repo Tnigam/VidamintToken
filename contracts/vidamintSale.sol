@@ -37,10 +37,11 @@ contract vidamintSale is CappedCrowdsale ,RefundableCrowdsale
         uint[] _preBuyersTokens
     ) 
         public
+        onlyOwner
     { 
         assert(!preSaleTokensDisbursed);
         for(uint i = 0;i < _preBuyers.length;i++) {
-            require(token.transfer(_preBuyers[i], _preBuyersTokens[i]));
+           token.transfer(_preBuyers[i], _preBuyersTokens[i]);
             TransferredPreBuyersReward(_preBuyers[i], _preBuyersTokens[i]);
         }
         preSaleTokensDisbursed = true;

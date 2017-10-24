@@ -33,7 +33,7 @@ contract(`Sale`, (accounts) => {
     }
 
     accounts = accs;
-    account = accounts[0];
+    var account = accounts[0];
     checkAllBalances();
     
   });
@@ -44,6 +44,7 @@ contract(`Sale`, (accounts) => {
    * Utility Functions
    */
   function checkAllBalances() { var i =0; web3.eth.accounts.forEach( function(e){ console.log("  eth.accounts["+i+"]: " +  e + " \tbalance: " + web3.fromWei(web3.eth.getBalance(e), "ether") + " ether"); i++; })};
+  
   function purchaseToken(actor, amount) {
     if (!BN.isBN(amount)) { throw new Error(`Supplied amount is not a BN.`); }
     return Sale.deployed()

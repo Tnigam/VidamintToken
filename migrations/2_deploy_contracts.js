@@ -1,5 +1,6 @@
 
 const vidamintSale = artifacts.require("./vidamintSale.sol");
+const vidamintToken = artifacts.require("./vidamintToken.sol");
 const fs = require('fs');
 const BN = require('bn.js');
 
@@ -76,7 +77,6 @@ async function liveDeploy(deployer, network,accounts) {
   const wallet = saleConf.wallet;
   console.log([startTime, endTime,rate,cap,goal,wallet]);
   // uint256 _startTime, uint256 _endTime, uint256 _rate, uint256, _cap, uint256 _goal, address _wallet) 
-  
   return deployer.deploy(vidamintSale
     , startTime
     , endTime 
@@ -85,40 +85,40 @@ async function liveDeploy(deployer, network,accounts) {
     , goal
     , wallet)
     .then( async () => {
-      const instance = await vidamintSale.deployed();
-      const token = await instance.token.call();
+      const vidaInsta = await vidamintSale.deployed();
+      const token = await vidaInsta.token.call();
       console.log('Token Address', token);
-      
-     /* instance.distributePreBuyersRewards(
-        preBuyers,
-        preBuyersTokens
-      );*/
-      /*console.log('preBuyers', preBuyers);
-      console.log('preBuyersTokens', preBuyersTokens);
-     */ 
-    })
-    .then( async () => {
-      const instance = await vidamintSale.deployed();
-      instance.distributePreBuyersRewards(
+      web3.eth.getAccounts(function(error, accounts) {
+        if (error) {
+          console.log(error);
+        }
+  
+        var account = accounts[0];
+  
+        vidamintToken.deployed().then(function(instance) {
+          tutorialTokenInstance = instance;
+  
+          return tutorialTokenInstance.balanceOf(account);
+        }).then(function(result) {
+          balance = result.c[0];
+          console.log('balance: ' +balance);
+         
+        }).catch(function(err) {
+          console.log(err.message);
+        });
+      });
+    });
+    
+   
+    /* .then(() => vidamintSale.deployed())
+    .then((vidamintSale) => vidamintSale.distributePreBuyersRewards(
       preBuyers,
-      preBuyersTokens 
-    ) 
-    console.log('preBuyers', preBuyers);
-    console.log('preBuyersTokens', preBuyersTokens);
+      preBuyersTokens
+    )); */
+  
+  }
 
-  }) .then( async () => {
-    const instance = await vidamintSale.deployed();
-    instance.distributePreBuyersRewards(
-    preBuyers,
-    preBuyersTokens 
-  ) 
-  console.log('preBuyers', preBuyers);
-  console.log('preBuyersTokens', preBuyersTokens);
-
-});
-}
-
-/*
+/*createTokenContract
 
 
   return deployer.deploy(Sale,

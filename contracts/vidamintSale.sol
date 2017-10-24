@@ -14,10 +14,11 @@ contract vidamintSale is CappedCrowdsale ,RefundableCrowdsale
     //As goal needs to be met for a successful crowdsale
     //the value needs to less or equal than a cap which is limit for accepted funds
     //require(_goal <= _cap);
+     
   }
   bool public preSaleTokensDisbursed = false;
   bool public foundersTokensDisbursed = false;
-  vidamintToken private token;
+  vidamintToken public token;
   event TransferredPreBuyersReward(address indexed preBuyer, uint amount);
   event TransferredFoundersTokens(address vault, uint amount);
   event PurchasedTokens(address indexed purchaser, uint amount);
@@ -36,7 +37,6 @@ contract vidamintSale is CappedCrowdsale ,RefundableCrowdsale
         uint[] _preBuyersTokens
     ) 
         public
-        onlyOwner
     { 
         assert(!preSaleTokensDisbursed);
         for(uint i = 0;i < _preBuyers.length;i++) {
@@ -45,5 +45,6 @@ contract vidamintSale is CappedCrowdsale ,RefundableCrowdsale
         }
         preSaleTokensDisbursed = true;
     }
+
 
 }

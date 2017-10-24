@@ -39,7 +39,11 @@ async function liveDeploy(deployer, network,accounts) {
     tokenConf = JSON.parse(fs.readFileSync('./conf/testToken.json'));
     preBuyersConf = JSON.parse(fs.readFileSync('./conf/testPreBuyers.json'));
     foundersConf = JSON.parse(fs.readFileSync('./conf/testFounders.json'));
+<<<<<<< HEAD
     saleConf.owner = '0xf1b5f4822ee45fa8572b32da967d606bddc802aa';
+=======
+    saleConf.owner = 0xf1b5f4822ee45fa8572b32da967d606bddc802aa;
+>>>>>>> 3c1f5a68f16e9aa254442859f8ca3edcd3af9452
     fs.writeFileSync('./conf/testSale.json', JSON.stringify(saleConf, null, '  '));
 
     let i = 10; // We use addresses from 0-3 for actors in the tests.

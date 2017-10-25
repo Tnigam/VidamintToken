@@ -15,11 +15,11 @@ module.exports = {
     development: {
       host: 'localhost',
       port: 8545,
-      network_id: '*',
-      from: "0xf1b5f4822ee45fa8572b32da967d606bddc802aa"
+      network_id: '*'
     },
     ropsten: {
-      provider: provider,
+      host: 'localhost',
+      port: 8545,
       network_id: 3 // official id of the ropsten network
     },
     coverage: {

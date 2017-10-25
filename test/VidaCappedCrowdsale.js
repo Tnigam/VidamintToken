@@ -34,7 +34,7 @@ contract(`Sale`, (accounts) => {
 
     accounts = accs;
     var account = accounts[0];
-    checkAllBalances();
+   // checkAllBalances();
     
   });
 
@@ -43,7 +43,8 @@ contract(`Sale`, (accounts) => {
   /*
    * Utility Functions
    */
-  function checkAllBalances() { var i =0; web3.eth.accounts.forEach( function(e){ console.log("  eth.accounts["+i+"]: " +  e + " \tbalance: " + web3.fromWei(web3.eth.getBalance(e), "ether") + " ether"); i++; })};
+  function checkAllBalances() { var i =0; web3.eth.accounts.forEach( function(e){ 
+    console.log("  eth.accounts["+i+"]: " +  e + " \tbalance: " + web3.fromWei(web3.eth.getBalance(e), "ether") + " ether"); i++; })};
   
   function purchaseToken(actor, amount) {
     if (!BN.isBN(amount)) { throw new Error(`Supplied amount is not a BN.`); }
@@ -131,19 +132,41 @@ contract(`Sale`, (accounts) => {
         Object.keys(preBuyersConf).map((curr, i, arr) =>
           new Promise((resolve, reject) =>
             getTokenBalanceOf(preBuyersConf[curr].address)
-            .then((balance) =>
+            .then((balance) =>{
+              console.log('preBuyeraddress '+ preBuyersConf[curr].address +' Pre Bal '+ balance.toString(10) + ' to be: ' + preBuyersConf[curr].amount.toString(10));
               resolve(
                 assert.equal(balance.toString(10),
                 preBuyersConf[curr].amount.toString(10),
                 `A preBuyer ${preBuyersConf[curr].address} was instantiated with ` +
                 `an incorrect balance.`)
               )
+            }
             )
             .catch((err) => reject(err))
           )
         )
       )
     );
+    it(`should instantiate founders with the proper number of tokens.`, () =>
+    Promise.all(
+      Object.keys(foundersConf.founders).map((curr, i, arr) =>
+        new Promise((resolve, reject) =>
+          getTokenBalanceOf(foundersConf.founders[curr].address)
+          .then((balance) =>{
+            console.log('foundersaddress '+ foundersConf.founders[curr].address +' Pre Bal '+ balance.toString(10) + ' to be: ' + foundersConf.founders[curr].amount.toString(10));
+            resolve(
+              assert.equal(balance.toString(10),
+              foundersConf.founders[curr].amount.toString(10),
+              `A founder ${foundersConf.founders[curr].address} was instantiated with ` +
+              `an incorrect balance.`)
+            )
+          }
+          )
+          .catch((err) => reject(err))
+        )
+      )
+    )
+  );
     it(`should instantiate the public sale with the total supply of tokens ` +
        `minus the sum of tokens pre-sold.`, () =>
       new Promise((resolve, reject) =>

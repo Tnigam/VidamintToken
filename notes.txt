@@ -1,5 +1,5 @@
 testrpc -a 100 -m "pulse holiday gadget frown bundle lonely deny midnight demand wreck bread track"
-Available Accounts0xdec78142165aa09ddef6e93045a8eb18659240e4
+Available Accounts
 ==================
 (0) 0xf1b5f4822ee45fa8572b32da967d606bddc802aa
 (1) 0x4d8d3c33d2792f3d9c98c6572eb8645d37be752a

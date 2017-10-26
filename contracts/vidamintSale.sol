@@ -16,14 +16,22 @@ contract vidamintSale is CappedCrowdsale,RefundableCrowdsale
   //  require(_goal <= _cap);
      
   }
-  bool public preSaleTokensDisbursed = false;
-  bool public foundersTokensDisbursed = false;
- 
-  event TransferredPreBuyersReward(address indexed preBuyer, uint amount);
-  event TransferredFoundersTokens(address vault, uint amount);
-  event TransferredlockedTokens (address indexed sender,address vault, uint amount);
+    bool public preSaleTokensDisbursed = false;
+    bool public foundersTokensDisbursed = false;
+    bool public emergencyFlag = false;
+    event TransferredPreBuyersReward(address indexed preBuyer, uint amount);
+    event TransferredFoundersTokens(address vault, uint amount);
+    event TransferredlockedTokens (address indexed sender,address vault, uint amount);
 
-  
+  /*
+     * Modifiers
+     */
+    
+    modifier notInEmergency {
+        assert(emergencyFlag == false);
+        _;
+    }
+
   function createTokenContract()  internal returns (MintableToken) {
    
     return  new vidamintToken();
@@ -68,24 +76,15 @@ contract vidamintSale is CappedCrowdsale,RefundableCrowdsale
 
         foundersTokensDisbursed = true;
     }
-   /*  function distributeTimeLockRewards(
-        address[] _timeLockUsers,
-        uint[] _timeLockUsersTokens,
-        uint64 _releaseTime
-    ) 
-        public
+     /*
+     * Owner-only functions
+     */
+
+     function changeRate(uint _newRate)
         onlyOwner
-    { 
-        MintableToken newToken;
-        TokenTimelock timeVault;     
-        for(uint j = 0; j < _timeLockUsers.length; j++) {
-            
-            newToken = new MintableToken();
-            timeVault = new TokenTimelock(newToken, _timeLockUsers[j], _releaseTime);
-            require(token.mint(_timeLockUsers[j], _timeLockUsersTokens[j]));
-            TransferredlockedTokens(_timeLockUsers[j], _timeLockUsersTokens[j]);
-        }
-    } */
-     // low level token purchase function
-  
+    {
+        require(_newRate != 0);
+        rate = _newRate;
+    }
+ 
 }

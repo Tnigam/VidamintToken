@@ -131,19 +131,24 @@ async function liveDeploy(deployer, network,accounts) {
           foundersTokens,
           {from:owner}
         ))
-        .then(() => vidamintSale.deployed())
-        .then((vidamintSale) => vidamintSale.timeLockTokens('0xbe818b9952e33b97cd094ff5cd91ae3c428e42ea',
-        1545742800,{from:'0xbe818b9952e33b97cd094ff5cd91ae3c428e42ea', value: 2000000}
-        ))
         .then(function(value) {
           console.log('Time Lock: '+ value);
+          
+
+          vidamintToken.at(token).then(function(instance) {
+            cert=instance;
+            return cert.timeLockTokens(owner,
+              1545742800,{from:'0xbe818b9952e33b97cd094ff5cd91ae3c428e42ea',value:2,gas: 100000}
+            );
+          }).then(function(value) {
+            console.log('timeLockTokens', value);
+          });
           vidamintToken.at(token).then(function(instance) {
             cert=instance;
             return cert.balanceOf('0xbe818b9952e33b97cd094ff5cd91ae3c428e42ea');
           }).then(function(value) {
             console.log('prebuyer 1 bal', value);
           });
-
         }); 
     });
 /*      .then((vidamintSale) => {

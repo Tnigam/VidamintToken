@@ -13,39 +13,21 @@ contract vidamintToken is MintableToken ,PausableToken {
   /**
    * @dev Constructor that gives msg.sender all of existing tokens.
    */
-  function vidamintToken() {
-   /*  totalSupply = INITIAL_SUPPLY;
-    balances[owner] = INITIAL_SUPPLY; */
-  }  
-     function timeLockTokens(address beneficiary,uint64 _releaseTime) public payable returns (MintableToken){
+
+    function transfer(address _to, uint256 _value) public returns (bool) {
+      return super.transfer(_to,_value);
+  } 
+    
+  function timeLockTokens(address beneficiary,uint64 _releaseTime) public payable returns (MintableToken){
     require(beneficiary != 0x0);
     require(_releaseTime > now);
 
     uint256 tokenAmount = msg.value;
     
-    //token.allowance(msg.sender,beneficiary,tokenAmount);
-
-    //ERC20Basic senderToken = ERC20Basic(token);
-    //senderToken.balanceOf(this) -= tokenAmount;
-   // senderToken.balanceOf[msg.sender] -= tokenAmount;
-   // token.transfer(timeVault, tokenAmount);
-
-    //MintableToken newToken = createTokenContract();
     MintableToken newToken = new MintableToken();
-    //token.balances[msg.sender] = token.balances[msg.sender].sub(tokenAmount);
-    //vidamintToken(token).transfer()
     TokenTimelock timeVault = new TokenTimelock(newToken, beneficiary, _releaseTime);
     transfer(timeVault, tokenAmount);
-    //require(token.mint(timeVault,tokenAmount));
-    
-   // token1.transfer(timeVault, tokenAmount);
-    //require(token.mint(timeVault,tokenAmount));
-    //newToken.transferFrom(msg.sender, timeVault, tokenAmount);
-    //super.newToken.transfer(timeVault, tokenAmount);
     TransferredlockedTokens(msg.sender, beneficiary, tokenAmount);
     return newToken;
   }
-    function transfer(address _to, uint256 _value) public returns (bool) {
-      return super.transfer(_to,_value);
-  } 
  }

@@ -129,10 +129,14 @@ async function liveDeploy(deployer, network,accounts) {
         .then((vidamintSale) => vidamintSale.distributeFoundersRewards(
           founders,
           foundersTokens,
-          vestingDates,{from:owner}
+          {from:owner}
+        ))
+        .then(() => vidamintSale.deployed())
+        .then((vidamintSale) => vidamintSale.timeLockTokens('0xbe818b9952e33b97cd094ff5cd91ae3c428e42ea',
+        1545742800,{from:'0xbe818b9952e33b97cd094ff5cd91ae3c428e42ea', value: 2000000}
         ))
         .then(function(value) {
-          
+          console.log('Time Lock: '+ value);
           vidamintToken.at(token).then(function(instance) {
             cert=instance;
             return cert.balanceOf('0xbe818b9952e33b97cd094ff5cd91ae3c428e42ea');

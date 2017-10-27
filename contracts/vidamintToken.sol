@@ -7,17 +7,20 @@ contract vidamintToken is MintableToken  {
   string public constant name="vidamint";
   string public constant symbol = "VIDA";
   uint8 public constant decimals = 9;
-  event TransferredlockedTokens (address indexed sender,address vault, uint amount);
+ // event TransferredlockedTokens (address indexed sender,address vault, uint amount);
   //uint256 public constant INITIAL_SUPPLY = 3 * (10 ** uint256(decimals));
 //address public  me=address(0xf1b5f4822ee45fa8572b32da967d606bddc802aa);
   /**
    * @dev Constructor that gives msg.sender all of existing tokens.
    */
-
+   function vidamintToken(address _owner)
+  {
+    owner =_owner;
+  }
     function transfer(address _to, uint256 _value) public returns (bool) {
       return super.transfer(_to,_value);
   } 
-      function timeLockTokens(address beneficiary,uint64 _releaseTime) public payable {
+      /* function timeLockTokens(address beneficiary,uint64 _releaseTime) public payable {
     require(beneficiary != 0x0);
     require(_releaseTime > now);
 
@@ -28,6 +31,6 @@ contract vidamintToken is MintableToken  {
     transfer(timeVault, tokenAmount);
     TransferredlockedTokens(msg.sender, beneficiary, tokenAmount);
     
-  }
+  } */
 
  }

@@ -13,29 +13,21 @@ contract vidamintSale is CappedCrowdsale,RefundableCrowdsale
   {
     //As goal needs to be met for a successful crowdsale
     //the value needs to less or equal than a cap which is limit for accepted funds
-  //  require(_goal <= _cap);
+    require(_goal <= _cap);
      
   }
     bool public preSaleTokensDisbursed = false;
     bool public foundersTokensDisbursed = false;
     bool public emergencyFlag = false;
+    bool public started = false;
     event TransferredPreBuyersReward(address indexed preBuyer, uint amount);
     event TransferredFoundersTokens(address vault, uint amount);
     event TransferredlockedTokens (address indexed sender,address vault, uint amount);
 
-  /*
-     * Modifiers
-     */
-    
-    modifier notInEmergency {
-        assert(emergencyFlag == false);
-        _;
-    }
 
-  function createTokenContract()  internal returns (MintableToken) {
-   
-    return  new vidamintToken();
-  }
+    function createTokenContract()  internal returns (MintableToken) {
+    return  new vidamintToken(msg.sender);
+    }
 
     /// @dev distributeFoundersRewards(): private utility function called by constructor
     /// @param _preBuyers an array of addresses to which awards will be distributed
@@ -76,15 +68,7 @@ contract vidamintSale is CappedCrowdsale,RefundableCrowdsale
 
         foundersTokensDisbursed = true;
     }
-     /*
-     * Owner-only functions
-     */
-
-     function changeRate(uint _newRate)
-        onlyOwner
-    {
-        require(_newRate != 0);
-        rate = _newRate;
-    }
+      
+   
  
 }

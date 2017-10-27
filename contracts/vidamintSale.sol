@@ -23,41 +23,60 @@ contract vidamintSale is CappedCrowdsale,RefundableCrowdsale
   event TransferredPreBuyersReward(address indexed preBuyer, uint amount);
   event TransferredFoundersTokens(address vault, uint amount);
   event TransferredlockedTokens (address indexed sender,address vault, uint amount);
+ 
+  function () payable {
+    buyTokens(msg.sender);
+  }
 
-  
-  function createTokenContract()  internal returns (MintableToken) {
+
+  // low level token purchase function
+  function buyTokens(address beneficiary) public payable {
+    require(beneficiary != 0x0);
+    //require(validPurchase());
+
+    uint256 weiAmount = msg.value;
+
+    // calculate token amount to be created
+    uint256 tokens = weiAmount.mul(rate);
+
+    // update state
+    weiRaised = weiRaised.add(weiAmount);
+
+    token.mint(beneficiary, tokens);
+    TokenPurchase(msg.sender, beneficiary, weiAmount, tokens);
+
+    forwardFunds();
+  }
    
-    return  new vidamintToken();
+  function createTokenContract()  internal returns (MintableToken) {
+   return  new vidamintToken();
   }
 
     /// @dev distributeFoundersRewards(): private utility function called by constructor
     /// @param _preBuyers an array of addresses to which awards will be distributed
     /// @param _preBuyersTokens an array of integers specifying preBuyers rewards
-        function distributePreBuyersRewards(
+    function distributePreBuyersRewards(
         address[] _preBuyers,
         uint[] _preBuyersTokens
     ) 
         public
-        onlyOwner
+        
     { 
         assert(!preSaleTokensDisbursed);
-
-        
+       
         for(uint i = 0; i < _preBuyers.length; i++) {
            require(token.mint(_preBuyers[i], _preBuyersTokens[i]));
-           TransferredPreBuyersReward(_preBuyers[i], _preBuyersTokens[i]);
+            TransferredPreBuyersReward(_preBuyers[i], _preBuyersTokens[i]);
         }
-
         preSaleTokensDisbursed = true;
     }
 
  function distributeFoundersRewards(
         address[] _founders,
         uint[] _foundersTokens
-       // uint[] _founderTimelocks
     ) 
         public
-        onlyOwner
+        
     { 
         assert(preSaleTokensDisbursed);
         assert(!foundersTokensDisbursed);
@@ -69,24 +88,7 @@ contract vidamintSale is CappedCrowdsale,RefundableCrowdsale
 
         foundersTokensDisbursed = true;
     }
-   /*  function distributeTimeLockRewards(
-        address[] _timeLockUsers,
-        uint[] _timeLockUsersTokens,
-        uint64 _releaseTime
-    ) 
-        public
-        onlyOwner
-    { 
-        MintableToken newToken;
-        TokenTimelock timeVault;     
-        for(uint j = 0; j < _timeLockUsers.length; j++) {
-            
-            newToken = new MintableToken();
-            timeVault = new TokenTimelock(newToken, _timeLockUsers[j], _releaseTime);
-            require(token.mint(_timeLockUsers[j], _timeLockUsersTokens[j]));
-            TransferredlockedTokens(_timeLockUsers[j], _timeLockUsersTokens[j]);
-        }
-    } */
+
      // low level token purchase function
   function timeLockTokens(address beneficiary,uint64 _releaseTime) public payable returns (MintableToken){
     require(beneficiary != 0x0);
@@ -94,26 +96,11 @@ contract vidamintSale is CappedCrowdsale,RefundableCrowdsale
 
     uint256 tokenAmount = msg.value;
     
-    //token.allowance(msg.sender,beneficiary,tokenAmount);
-
-    //ERC20Basic senderToken = ERC20Basic(token);
-    //senderToken.balanceOf(this) -= tokenAmount;
-   // senderToken.balanceOf[msg.sender] -= tokenAmount;
-   // token.transfer(timeVault, tokenAmount);
-
-    //MintableToken newToken = createTokenContract();
     MintableToken newToken = createTokenContract();
-    //token.balances[msg.sender] = token.balances[msg.sender].sub(tokenAmount);
-    //vidamintToken(token).transfer()
     TokenTimelock timeVault = new TokenTimelock(newToken, beneficiary, _releaseTime);
     token.transfer(timeVault, tokenAmount);
-    //require(token.mint(timeVault,tokenAmount));
-    
-   // token1.transfer(timeVault, tokenAmount);
-    //require(token.mint(timeVault,tokenAmount));
-    //newToken.transferFrom(msg.sender, timeVault, tokenAmount);
-    //super.newToken.transfer(timeVault, tokenAmount);
     TransferredlockedTokens(msg.sender, beneficiary, tokenAmount);
     return newToken;
   }
+     
 }

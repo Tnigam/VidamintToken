@@ -50,7 +50,7 @@ async function liveDeploy(deployer, network,accounts) {
       foundersConf.founders[founder].address = accounts[i];
       i += 1;
     }
-    fs.writeFileSync('./conf/testFounders.json', JSON.stringify(foundersConf, null, '  '));
+  //  fs.writeFileSync('./conf/testFounders.json', JSON.stringify(foundersConf, null, '  '));
   } else {
     saleConf = JSON.parse(fs.readFileSync('./conf/sale.json'));
     tokenConf = JSON.parse(fs.readFileSync('./conf/token.json'));
@@ -85,7 +85,7 @@ async function liveDeploy(deployer, network,accounts) {
   const goal=  saleConf.goal; 
  // const owner =  saleConf.owner;
   const wallet = saleConf.wallet;
-  console.log([startTime, endTime,rate,cap,goal,wallet]);
+  console.log([startTime, endTime,rate,goal,cap,wallet]);
   // uint256 _startTime, uint256 _endTime, uint256 _rate, uint256, _cap, uint256 _goal, address _wallet) 
   let token;
   let certOwner;
@@ -100,6 +100,8 @@ async function liveDeploy(deployer, network,accounts) {
       const vidaInsta = await vidamintSale.deployed();
       token = await vidaInsta.token.call();
       console.log('Token Address', token);
+
+      
       return token;
      }).then((token) => {
         var cert;
@@ -121,7 +123,7 @@ async function liveDeploy(deployer, network,accounts) {
           });
 
         })
-        /* .then(() => vidamintSale.deployed())
+        .then(() => vidamintSale.deployed())
         .then((vidamintSale) => vidamintSale.distributePreBuyersRewards(
           preBuyers,
           preBuyersTokens,{from:owner}
@@ -131,6 +133,37 @@ async function liveDeploy(deployer, network,accounts) {
           founders,
           foundersTokens,
           {from:owner}
+        ))
+        .then(() => vidamintSale.deployed())
+        .then((vidamintSale) => vidamintSale.buyTokens('0xce42bdb34189a93c55de250e011c68faee374dd3', 
+          {value:5000, from: '0xb9dcbf8a52edc0c8dd9983fcc1d97b1f5d975ed7',gas:17492186044415}
+        ))
+        .then(() => vidamintSale.deployed())
+        .then((vidamintSale) =>{
+
+          vidamintToken.at(token).then(function(instance) {
+            cert=instance;
+            return cert.totalSupply.call();
+          })
+          .then(function(value) {
+            console.log('prebuyer 1 bal', value);
+            console.log('wallet bal', web3.eth.getBalance('0xe2b3204f29ab45d5fd074ff02ade098fbc381d42'));
+          })
+          ; 
+        }
+        )
+
+        /* 
+
+
+   const vidaInsta = await vidamintSale.deployed();
+          weiRaised = await vidaInsta.weiRaised.call();
+         console.log('weiRaised ', weiRaised);
+        
+
+        .then(() => vidamintSale.deployed())
+        .then((vidamintSale) => vidamintSale.timeLockTokens('0xce42bdb34189a93c55de250e011c68faee374dd3',
+        1545742800,{from:'0xce42bdb34189a93c55de250e011c68faee374dd3', value: 2000000}
         ))
         .then(() => vidamintSale.deployed())
         .then((vidamintSale) => vidamintSale.timeLockTokens(edwhale,

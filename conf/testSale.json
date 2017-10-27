@@ -1,7 +1,7 @@
 {
   "owner": "0xdf08f82de32b8d460adbe8d72043e3a7e25a3b39",
-  "wallet": "0xafadbd44b6e32F7C3c645e528cD57062c48220d0",
-  "cap": 5000000,
+  "wallet": "0xe2b3204f29ab45d5fd074ff02ade098fbc381d42",
+  "cap": 500000000000000000,
   "rate": 2500,
-  "goal": 50000
+  "goal": 5000000000000000
 }

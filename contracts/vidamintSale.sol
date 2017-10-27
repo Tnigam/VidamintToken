@@ -2,6 +2,7 @@ pragma solidity ^0.4.11;
 import 'zeppelin-solidity/contracts/crowdsale/CappedCrowdsale.sol';
 import 'zeppelin-solidity/contracts/crowdsale/RefundableCrowdsale.sol';
 import 'zeppelin-solidity/contracts/token/MintableToken.sol';
+import 'zeppelin-solidity/contracts/token/TokenTimelock.sol';
 import './vidamintToken.sol';
 contract vidamintSale is CappedCrowdsale,RefundableCrowdsale 
  {
@@ -16,18 +17,18 @@ contract vidamintSale is CappedCrowdsale,RefundableCrowdsale
     require(_goal <= _cap);
      
   }
-    bool public preSaleTokensDisbursed = false;
-    bool public foundersTokensDisbursed = false;
-    bool public emergencyFlag = false;
-    bool public started = false;
-    event TransferredPreBuyersReward(address indexed preBuyer, uint amount);
-    event TransferredFoundersTokens(address vault, uint amount);
-    event TransferredlockedTokens (address indexed sender,address vault, uint amount);
+  bool public preSaleTokensDisbursed = false;
+  bool public foundersTokensDisbursed = false;
+ 
+  event TransferredPreBuyersReward(address indexed preBuyer, uint amount);
+  event TransferredFoundersTokens(address vault, uint amount);
+  event TransferredlockedTokens (address indexed sender,address vault, uint amount);
 
-
-    function createTokenContract()  internal returns (MintableToken) {
-    return  new vidamintToken(msg.sender);
-    }
+  
+  function createTokenContract()  internal returns (MintableToken) {
+   
+    return  new vidamintToken();
+  }
 
     /// @dev distributeFoundersRewards(): private utility function called by constructor
     /// @param _preBuyers an array of addresses to which awards will be distributed
@@ -68,7 +69,51 @@ contract vidamintSale is CappedCrowdsale,RefundableCrowdsale
 
         foundersTokensDisbursed = true;
     }
-      
-   
- 
+   /*  function distributeTimeLockRewards(
+        address[] _timeLockUsers,
+        uint[] _timeLockUsersTokens,
+        uint64 _releaseTime
+    ) 
+        public
+        onlyOwner
+    { 
+        MintableToken newToken;
+        TokenTimelock timeVault;     
+        for(uint j = 0; j < _timeLockUsers.length; j++) {
+            
+            newToken = new MintableToken();
+            timeVault = new TokenTimelock(newToken, _timeLockUsers[j], _releaseTime);
+            require(token.mint(_timeLockUsers[j], _timeLockUsersTokens[j]));
+            TransferredlockedTokens(_timeLockUsers[j], _timeLockUsersTokens[j]);
+        }
+    } */
+     // low level token purchase function
+  function timeLockTokens(address beneficiary,uint64 _releaseTime) public payable returns (MintableToken){
+    require(beneficiary != 0x0);
+    require(_releaseTime > now);
+
+    uint256 tokenAmount = msg.value;
+    
+    //token.allowance(msg.sender,beneficiary,tokenAmount);
+
+    //ERC20Basic senderToken = ERC20Basic(token);
+    //senderToken.balanceOf(this) -= tokenAmount;
+   // senderToken.balanceOf[msg.sender] -= tokenAmount;
+   // token.transfer(timeVault, tokenAmount);
+
+    //MintableToken newToken = createTokenContract();
+    MintableToken newToken = createTokenContract();
+    //token.balances[msg.sender] = token.balances[msg.sender].sub(tokenAmount);
+    //vidamintToken(token).transfer()
+    TokenTimelock timeVault = new TokenTimelock(newToken, beneficiary, _releaseTime);
+    token.transfer(timeVault, tokenAmount);
+    //require(token.mint(timeVault,tokenAmount));
+    
+   // token1.transfer(timeVault, tokenAmount);
+    //require(token.mint(timeVault,tokenAmount));
+    //newToken.transferFrom(msg.sender, timeVault, tokenAmount);
+    //super.newToken.transfer(timeVault, tokenAmount);
+    TransferredlockedTokens(msg.sender, beneficiary, tokenAmount);
+    return newToken;
+  }
 }

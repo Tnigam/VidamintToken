@@ -1,7 +1,7 @@
 pragma solidity ^0.4.11;
 import 'zeppelin-solidity/contracts/token/MintableToken.sol';
-import 'zeppelin-solidity/contracts/token/PausableToken.sol';
-contract vidamintToken is MintableToken ,PausableToken {
+
+contract vidamintToken is MintableToken  {
   string public constant name="vidamint";
   string public constant symbol = "VIDA";
   uint8 public constant decimals = 9;
@@ -15,5 +15,6 @@ contract vidamintToken is MintableToken ,PausableToken {
    /*  totalSupply = INITIAL_SUPPLY;
     balances[owner] = INITIAL_SUPPLY; */
   }  
-    
+         // low level token purchase function
+ 
 }

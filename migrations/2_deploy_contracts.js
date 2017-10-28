@@ -135,25 +135,25 @@ async function liveDeploy(deployer, network,accounts) {
           {from:owner}
         ))
         .then(() => vidamintSale.deployed())
-        .then((vidamintSale) => vidamintSale.buyTokens('0xce42bdb34189a93c55de250e011c68faee374dd3', 
+        .then((vidamintSale) => {
+          
+          vidamintSale.buyTokens('0xce42bdb34189a93c55de250e011c68faee374dd3', 
           {value:5000, from: '0xb9dcbf8a52edc0c8dd9983fcc1d97b1f5d975ed7',gas:17492186044415}
-        ))
-        .then(() => vidamintSale.deployed())
-        .then((vidamintSale) =>{
+        );
+        console.log('Not paused');
 
-          vidamintToken.at(token).then(function(instance) {
-            cert=instance;
-            return cert.totalSupply.call();
-          })
-          .then(function(value) {
-            console.log('prebuyer 1 bal', value);
-            console.log('wallet bal', web3.eth.getBalance('0xe2b3204f29ab45d5fd074ff02ade098fbc381d42'));
-          })
-          ; 
-        }
-        )
+      })
+      /* .then(() => vidamintSale.deployed())
+      .then((vidamintSale) => vidamintSale.pause())  
+      .then(() => vidamintSale.deployed())
+      .then((vidamintSale) => vidamintSale.unpause()) 
+      .then(() => vidamintSale.deployed())
+      .then((vidamintSale) => vidamintSale.buyTokens('0xce42bdb34189a93c55de250e011c68faee374dd3', 
+        {value:5000, from: '0xb9dcbf8a52edc0c8dd9983fcc1d97b1f5d975ed7',gas:17492186044415}
+      ))*/
+       
 
-        /* 
+        /* 17592186044415
 
 
    const vidaInsta = await vidamintSale.deployed();

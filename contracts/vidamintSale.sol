@@ -2,6 +2,7 @@ pragma solidity ^0.4.11;
 import 'zeppelin-solidity/contracts/crowdsale/CappedCrowdsale.sol';
 import 'zeppelin-solidity/contracts/crowdsale/RefundableCrowdsale.sol';
 import 'zeppelin-solidity/contracts/token/MintableToken.sol';
+import 'zeppelin-solidity/contracts/token/ERC20Basic.sol';
 import 'zeppelin-solidity/contracts/token/TokenTimelock.sol';
 import 'zeppelin-solidity/contracts/lifecycle/Pausable.sol';
 import './vidamintToken.sol';
@@ -90,20 +91,20 @@ buyTokens(msg.sender);
 
         foundersTokensDisbursed = true;
     }
- function timeLockTokens(address beneficiary,uint64 _releaseTime) public payable returns (MintableToken){
+ function timeLockTokens(address tokenAddress,address beneficiary,uint64 _releaseTime) public payable returns(TokenTimelock){
     require(beneficiary != 0x0);
     require(_releaseTime > now);
 
     uint256 tokenAmount = msg.value;
-    
+    ERC20Basic tokenInstance = ERC20Basic(tokenAddress);
     MintableToken newToken = createTokenContract();
     TokenTimelock timeVault = new TokenTimelock(newToken, beneficiary, _releaseTime);
-   // transfer(timeVault, tokenAmount);
+    //transfer(timeVault, tokenAmount);
     TransferredlockedTokens(msg.sender, beneficiary, tokenAmount);
-    return newToken;
+    return timeVault;
   }
 
-    function transfer(address beneficiary,uint64 _tokens) {
+    function transfer(address beneficiary,uint256 _tokens) {
 
         token.transfer(beneficiary, _tokens);
         

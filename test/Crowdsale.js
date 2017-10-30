@@ -11,19 +11,20 @@ const should = require('chai')
   .use(require('chai-bignumber')(BigNumber))
   .should()
 
-const Crowdsale = artifacts.require('Crowdsale')
+const Crowdsale = artifacts.require('vidamintSale')
 const MintableToken = artifacts.require('MintableToken')
 
 contract('Crowdsale', function ([_, investor, wallet, purchaser]) {
 
   const rate = new BigNumber(1000)
   const value = ether(42)
-
+  const goal = ether(100)
+  const cap = ether(300)
   const expectedTokenAmount = rate.mul(value)
 
   before(async function() {
     //Advance to the next block to correctly read time in the solidity "now" function interpreted by testrpc
-    await advanceBlock()
+     await advanceBlock()
   })
 
   beforeEach(async function () {
@@ -32,7 +33,7 @@ contract('Crowdsale', function ([_, investor, wallet, purchaser]) {
     this.afterEndTime = this.endTime + duration.seconds(1)
 
 
-    this.crowdsale = await Crowdsale.new(this.startTime, this.endTime, rate, wallet)
+    this.crowdsale = await Crowdsale.new(this.startTime, this.endTime, rate, goal,cap,wallet)
 
     this.token = MintableToken.at(await this.crowdsale.token())
   })
@@ -52,6 +53,10 @@ contract('Crowdsale', function ([_, investor, wallet, purchaser]) {
 
   describe('accepting payments', function () {
 
+    /* it('should reject payments before Pause removed', async function () {
+      await this.crowdsale.buyTokens(investor, {from: purchaser, value: value}).should.be.rejectedWith(EVMThrow)
+    }) */
+
     it('should reject payments before start', async function () {
       await this.crowdsale.send(value).should.be.rejectedWith(EVMThrow)
       await this.crowdsale.buyTokens(investor, {from: purchaser, value: value}).should.be.rejectedWith(EVMThrow)
@@ -59,6 +64,7 @@ contract('Crowdsale', function ([_, investor, wallet, purchaser]) {
 
     it('should accept payments after start', async function () {
       await increaseTimeTo(this.startTime)
+      //await this.crowdsale.unpause()
       await this.crowdsale.send(value).should.be.fulfilled
       await this.crowdsale.buyTokens(investor, {value: value, from: purchaser}).should.be.fulfilled
     })

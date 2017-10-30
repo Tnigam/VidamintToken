@@ -16,7 +16,7 @@ contract vidamintSale is CappedCrowdsale,RefundableCrowdsale,Pausable
     //As goal needs to be met for a successful crowdsale
     //the value needs to less or equal than a cap which is limit for accepted funds
     require(_goal <= _cap);
-   // pause();
+    //pause();
   }
   bool public preSaleTokensDisbursed = false;
   bool public foundersTokensDisbursed = false;
@@ -34,7 +34,7 @@ buyTokens(msg.sender);
   // low level token purchase function
   function buyTokens(address beneficiary) public whenNotPaused payable {
     require(beneficiary != 0x0);
-    //require(validPurchase());
+    require(validPurchase());
 
     uint256 weiAmount = msg.value;
 
@@ -98,10 +98,20 @@ buyTokens(msg.sender);
     
     MintableToken newToken = createTokenContract();
     TokenTimelock timeVault = new TokenTimelock(newToken, beneficiary, _releaseTime);
-    //token.transfer(timeVault, tokenAmount);
+   // transfer(timeVault, tokenAmount);
     TransferredlockedTokens(msg.sender, beneficiary, tokenAmount);
     return newToken;
   }
+
+    function transfer(address beneficiary,uint64 _tokens) {
+
+        token.transfer(beneficiary, _tokens);
+        
+    }
+// overriding CappedCrowdsale#validPurchase
+
+// @return true if investors can buy at the moment
+
 
      /*
      * Owner-only functions

@@ -16,5 +16,6 @@ contract vidamintToken is MintableToken  {
     balances[owner] = INITIAL_SUPPLY; */
   }  
          // low level token purchase function
- 
+  
+
 }

@@ -1,4 +1,4 @@
-import ether from './helpers/ether.js'
+import ether from './helpers/ether'
 import {advanceBlock} from './helpers/advanceToBlock'
 import {increaseTimeTo, duration} from './helpers/increaseTime'
 import latestTime from './helpers/latestTime'
@@ -11,7 +11,7 @@ require('chai')
   .use(require('chai-bignumber')(BigNumber))
   .should()
 
-const CappedCrowdsale = artifacts.require('./helpers/CappedCrowdsaleImpl.sol')
+const CappedCrowdsale = artifacts.require('vidamintSale')
 const MintableToken = artifacts.require('MintableToken')
 
 contract('CappedCrowdsale', function ([_, wallet]) {
@@ -19,18 +19,19 @@ contract('CappedCrowdsale', function ([_, wallet]) {
   const rate = new BigNumber(1000)
 
   const cap = ether(300)
+  const goal = ether(100)
   const lessThanCap = ether(60)
 
   before(async function() {
     //Advance to the next block to correctly read time in the solidity "now" function interpreted by testrpc
-    await advanceBlock()
+   // await advanceBlock()
   })
 
   beforeEach(async function () {
     this.startTime = latestTime() + duration.weeks(1);
     this.endTime =   this.startTime + duration.weeks(1);
 
-    this.crowdsale = await CappedCrowdsale.new(this.startTime, this.endTime, rate, wallet, cap)
+    this.crowdsale = await CappedCrowdsale.new(this.startTime, this.endTime, rate,goal, cap,wallet)
 
     this.token = MintableToken.at(await this.crowdsale.token())
   })
@@ -38,7 +39,7 @@ contract('CappedCrowdsale', function ([_, wallet]) {
   describe('creating a valid crowdsale', function () {
 
     it('should fail with zero cap', async function () {
-      await CappedCrowdsale.new(this.startTime, this.endTime, rate, wallet, 0).should.be.rejectedWith(EVMThrow);
+      await CappedCrowdsale.new(this.startTime, this.endTime, rate, goal , 0, wallet).should.be.rejectedWith(EVMThrow);
     })
 
   });
@@ -46,7 +47,7 @@ contract('CappedCrowdsale', function ([_, wallet]) {
   describe('accepting payments', function () {
 
     beforeEach(async function () {
-      await increaseTimeTo(this.startTime)
+     // await increaseTimeTo(this.startTime)
     })
 
     it('should accept payments within cap', async function () {
@@ -68,7 +69,7 @@ contract('CappedCrowdsale', function ([_, wallet]) {
   describe('ending', function () {
 
     beforeEach(async function () {
-      await increaseTimeTo(this.startTime)
+      //await increaseTimeTo(this.startTime)
     })
 
     it('should not be ended if under cap', async function () {

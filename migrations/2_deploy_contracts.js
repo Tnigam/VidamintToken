@@ -14,12 +14,6 @@ module.exports = function(deployer, network, accounts) {
 function latestTime() {
   return web3.eth.getBlock('latest').timestamp;
 }
-function increaseTimeTo(target) {
-  let now = latestTime();
-  if (target < now) throw Error(`Cannot increase current time(${now}) to a moment in the past(${target})`);
-  let diff = target - now;
-  return increaseTime(diff);
-}
 function getTokenBalanceOf(actor) {
   return vidamintSale.deployed()
   .then((sale) => sale.token.call())
@@ -85,7 +79,7 @@ async function liveDeploy(deployer, network,accounts) {
 
   const BigNumber = web3.BigNumber;
   const rate = saleConf.rate;
-  const startTime = latestTime();
+  const startTime = latestTime() + duration.minutes(1);
   const endTime =  startTime + duration.weeks(1);
   const cap = saleConf.cap;
   const goal=  saleConf.goal; 
@@ -129,144 +123,7 @@ async function liveDeploy(deployer, network,accounts) {
           });
 
         })
-        .then(() => vidamintSale.deployed())
-        .then((vidamintSale) => vidamintSale.distributePreBuyersRewards(
-          preBuyers,
-          preBuyersTokens,{from:owner}
-        ))
-        .then(() => vidamintSale.deployed())
-        .then((vidamintSale) => vidamintSale.distributeFoundersRewards(
-          founders,
-          foundersTokens,
-          {from:owner}
-        ))
-        .then(() => vidamintSale.deployed())
-        .then((vidamintSale) => {
-          
-         // increaseTimeTo(startTime);
-
-          return vidamintSale.buyTokens('0xce42bdb34189a93c55de250e011c68faee374dd3', 
-          {value:5000, from: '0xce42bdb34189a93c55de250e011c68faee374dd3',gas:17492186044415}
-        );
-        })
-        .then(() => vidamintSale.deployed())
-        .then((vidamintSale) => {
-          
-          return vidamintSale.buyTokens('0xce42bdb34189a93c55de250e011c68faee374dd3', 
-          {value:5000, from: '0xce42bdb34189a93c55de250e011c68faee374dd3',gas:17492186044415}
-        );
-        })
-        .then(function(value) {
-          vidamintToken.at(token).then(function(instance) {
-            cert=instance;
-            return cert.balanceOf('0xce42bdb34189a93c55de250e011c68faee374dd3');
-          })
-          .then(function(value) {
-            console.log('prebuyer bal before transfer: ', value);
-          }); 
-
-        })
-        .then(() => vidamintSale.deployed())
-        .then((vidamintSale) => {
-          
-          return vidamintSale.timeLockTokens(token,'0xce42bdb34189a93c55de250e011c68faee374dd3',
-          1545742800,{from:'0xce42bdb34189a93c55de250e011c68faee374dd3',value:200,gas: 17592186044415}
-        );
-        })
-        .then(function(value) {
-          var timelock =value.receipt.logs["0"].address;
-          console.log('Timeloack : '+timelock);
-           vidamintToken.at(token).then(function(instance) {
-            cert=instance;
-            return cert.transfer(timelock,200,{from:'0xce42bdb34189a93c55de250e011c68faee374dd3'});
-          })
-          .then(function(value) {
-            console.log('transfer bal', value);
-          });  
-         
-        })
-        .then(() => vidamintSale.deployed())
-        .then((vidamintSale) => {
-          return vidamintSale.weiRaised.call();
-          
-        })
-        .then(function(value) {
-          console.log('wei bal: '+ value);
-          vidamintToken.at(token).then(function(instance) {
-            cert=instance;
-            return cert.balanceOf('0xce42bdb34189a93c55de250e011c68faee374dd3');
-          })
-          .then(function(value) {
-            console.log('prebuyer 1 bal after transfer', value);
-          }); 
-
-        })
-      /* .then(() => vidamintSale.deployed())
-      .then((vidamintSale) => vidamintSale.pause())  
-      .then(() => vidamintSale.deployed())
-      .then((vidamintSale) => vidamintSale.unpause()) 
-      .then(() => vidamintSale.deployed())
-      .then((vidamintSale) => vidamintSale.buyTokens('0xce42bdb34189a93c55de250e011c68faee374dd3', 
-        {value:5000, from: '0xb9dcbf8a52edc0c8dd9983fcc1d97b1f5d975ed7',gas:17492186044415}
-      ))
-       
-      vidamintToken.at(token).then(function(instance) {
-        cert=instance;
-         return cert.timeLockTokens(token,'0xce42bdb34189a93c55de250e011c68faee374dd3',
-          1545742800,{from:'0xce42bdb34189a93c55de250e011c68faee374dd3',value:2,gas: 17592186044415}
-        ); 
-       // return cert.balanceOf('0xce42bdb34189a93c55de250e011c68faee374dd3');
-      }).then(function(value) {
-        console.log('timeLockTokens', value);
-      });*/
-        /* 17592186044415
-
-
-   const vidaInsta = await vidamintSale.deployed();
-          weiRaised = await vidaInsta.weiRaised.call();
-         console.log('weiRaised ', weiRaised);
-        
-
-        .then(() => vidamintSale.deployed())
-        .then((vidamintSale) => vidamintSale.timeLockTokens('0xce42bdb34189a93c55de250e011c68faee374dd3',
-        1545742800,{from:'0xce42bdb34189a93c55de250e011c68faee374dd3', value: 2000000}
-        ))
-        .then(() => vidamintSale.deployed())
-        .then((vidamintSale) => vidamintSale.timeLockTokens(edwhale,
-        1545742800,{from:edwhale, value: 2000000}
-        ))
-        .then(function(value) {
-          console.log('Time Lock: '+ value);
-          vidamintToken.at(token).then(function(instance) {
-            cert=instance;
-            return cert.balanceOf('0xbe818b9952e33b97cd094ff5cd91ae3c428e42ea');
-          }).then(function(value) {
-            console.log('prebuyer 1 bal', value);
-          }); 
-
-        }); */
     });
-/*      .then((vidamintSale) => {
-      vidamintSale.distributePreBuyersRewards(
-      preBuyers,
-      preBuyersTokens
-    )
-    
-  }); */
+
   
   }  
-    /* .then(() => vidamintSale.deployed())
-    .then((vidamintSale) => vidamintSale.distributePreBuyersRewards(
-      preBuyers,
-      preBuyersTokens
-    )); 
-    
-     var cert;
-      vidamintToken.at(token).then(function(instance) {
-        cert=instance;
-        return cert.balanceOf('0xf1b5f4822ee45fa8572b32da967d606bddc802aa');
-      }).then(function(value) {
-        console.log('bal', value);
-      });*/
-  
- 

@@ -1,241 +1,97 @@
-/*global web3 describe before artifacts assert it contract:true after*/
-const Sale = artifacts.require("./vidamintSale.sol");
-const HumanStandardToken = artifacts.require(`./MintableToken.sol`);
-const fs = require(`fs`);
-const BN = require(`bn.js`);
-const HttpProvider = require(`ethjs-provider-http`);
-const EthRPC = require(`ethjs-rpc`);
-const EthQuery = require(`ethjs-query`);
-const ethRPC = new EthRPC(new HttpProvider(`http://localhost:8545`));
-const ethQuery = new EthQuery(new HttpProvider(`http://localhost:8545`));
+import ether from './helpers/ether'
+import {advanceBlock} from './helpers/advanceToBlock'
+import {increaseTimeTo, duration} from './helpers/increaseTime'
+import latestTime from './helpers/latestTime'
+import EVMThrow from './helpers/EVMThrow'
 
+const BigNumber = web3.BigNumber
 
+require('chai')
+  .use(require('chai-as-promised'))
+  .use(require('chai-bignumber')(BigNumber))
+  .should()
 
-contract(`Sale`, (accounts) => {
-  const preBuyersConf = JSON.parse(fs.readFileSync(`./conf/testPreBuyers.json`));
-  const foundersConf = JSON.parse(fs.readFileSync(`./conf/testFounders.json`));
-  const saleConf = JSON.parse(fs.readFileSync(`./conf/testSale.json`));
-  const tokenConf = JSON.parse(fs.readFileSync(`./conf/testToken.json`));
-  const [owner, james, miguel, edwhale] = accounts;
+const CappedCrowdsale = artifacts.require('vidamintSale')
+const MintableToken = artifacts.require('MintableToken')
 
-  let tokensForSale;
+contract('CappedCrowdsale', function ([_, wallet]) {
 
- 
-  web3.eth.getAccounts(function(err, accs) {
-    if (err != null) {
-      alert("There was an error fetching your accounts.");
-      return;
-    }
+  const rate = new BigNumber(1000)
 
-    if (accs.length == 0) {
-      alert("Couldn't get any accounts! Make sure your Ethereum client is configured correctly.");
-      return;
-    }
+  const cap = ether(300)
+  const goal = ether(100)
+  const lessThanCap = ether(60)
 
-    accounts = accs;
-    var account = accounts[0];
-   // checkAllBalances();
-    
+  before(async function() {
+    //Advance to the next block to correctly read time in the solidity "now" function interpreted by testrpc
+   // await advanceBlock()
+  })
+
+  beforeEach(async function () {
+    this.startTime = latestTime() + duration.weeks(1);
+    this.endTime =   this.startTime + duration.weeks(1);
+
+    this.crowdsale = await CappedCrowdsale.new(this.startTime, this.endTime, rate,goal, cap,wallet)
+
+    this.token = MintableToken.at(await this.crowdsale.token())
+  })
+
+  describe('creating a valid crowdsale', function () {
+
+    it('should fail with zero cap', async function () {
+      await CappedCrowdsale.new(this.startTime, this.endTime, rate, goal , 0, wallet).should.be.rejectedWith(EVMThrow);
+    })
+
   });
 
+  describe('accepting payments', function () {
 
+    beforeEach(async function () {
+      await increaseTimeTo(this.startTime)
+    })
 
-  /*
-   * Utility Functions
-   */
-  function checkAllBalances() { var i =0; web3.eth.accounts.forEach( function(e){ 
-    console.log("  eth.accounts["+i+"]: " +  e + " \tbalance: " + web3.fromWei(web3.eth.getBalance(e), "ether") + " ether"); i++; })};
-  
-  function purchaseToken(actor, amount) {
-    if (!BN.isBN(amount)) { throw new Error(`Supplied amount is not a BN.`); }
-    return Sale.deployed()
-    .then((sale) => sale.purchaseTokens(
-      {from: actor, value: amount.mul(saleConf.price)}));
-  }
+    it('should accept payments within cap', async function () {
+      await this.crowdsale.send(cap.minus(lessThanCap)).should.be.fulfilled
+      await this.crowdsale.send(lessThanCap).should.be.fulfilled
+    })
 
-  function getTokenBalanceOf(actor) {
-    return Sale.deployed()
-    .then((sale) => sale.token.call())
-    .then((tokenAddr) => HumanStandardToken.at(tokenAddr))
-    .then((token) => token.balanceOf.call(actor))
-    .then((balance) => new BN(balance.valueOf(), 10))
-    .catch((err) => { throw new Error(err); });
-  }
+    it('should reject payments outside cap', async function () {
+      await this.crowdsale.send(cap)
+      await this.crowdsale.send(1).should.be.rejectedWith(EVMThrow)
+    })
 
-  function totalPreSoldTokens() {
-    let tokensPreSold = new BN(`0`, 10);
-    Object.keys(preBuyersConf).map((curr, i, arr) => {
-      preBuyersConf[curr].amount = new BN(preBuyersConf[curr].amount, 10);
-      tokensPreSold = tokensPreSold.add(preBuyersConf[curr].amount);
-      return null;
-    });
-    return tokensPreSold;
-  }
+    it('should reject payments that exceed cap', async function () {
+      await this.crowdsale.send(cap.plus(1)).should.be.rejectedWith(EVMThrow)
+    })
 
-  function totalFoundersTokens() {
-    let foundersTokens = new BN(`0`, 10);
-    getFounders().map((curr, i, arr) => {
-      foundersConf.founders[curr].amount = new BN(foundersConf.founders[curr].amount, 10);
-      foundersTokens = foundersTokens.add(foundersConf.founders[curr].amount);
-      return null;
-    });
-    return foundersTokens;
-  }
+  })
 
-  function getFilter(index) {
-    return Sale.deployed()
-    .then((sale) => sale.filters.call(index))
-    .then((filterAddr) => Filter.at(filterAddr));
-  }
+  describe('ending', function () {
 
-  function getFoundersAddresses() {
-    return getFounders().map((curr, i, arr) =>
-      foundersConf.founders[curr].address
-    );
-  }
+    beforeEach(async function () {
+      await increaseTimeTo(this.startTime)
+    })
 
-  function getFounders() {
-    return Object.keys(foundersConf.founders);
-  }
+    it('should not be ended if under cap', async function () {
+      let hasEnded = await this.crowdsale.hasEnded()
+      hasEnded.should.equal(false)
+      await this.crowdsale.send(lessThanCap)
+      hasEnded = await this.crowdsale.hasEnded()
+      hasEnded.should.equal(false)
+    })
 
-  function forceMine(blockToMine) {
-    return new Promise((resolve, reject) => {
-      if (!BN.isBN(blockToMine)) {
-        reject(`Supplied block number must be a BN.`);
-      }
-      return ethQuery.blockNumber()
-      .then((blockNumber) => {
-        if (new BN(blockNumber, 10).lt(blockToMine)) {
-          ethRPC.sendAsync({method: `evm_mine`}, (err) => {
-            if (err !== undefined && err !== null) { reject(err); }
-            resolve(forceMine(blockToMine));
-          });
-        } else {
-          resolve();
-        }
-      });
-    });
-  }
+    it('should not be ended if just under cap', async function () {
+      await this.crowdsale.send(cap.minus(1))
+      let hasEnded = await this.crowdsale.hasEnded()
+      hasEnded.should.equal(false)
+    })
 
-  before(() => {
-    const tokensPreAllocated = totalPreSoldTokens().add(totalFoundersTokens());
-    saleConf.price = new BN(saleConf.price, 10);
-    saleConf.startBlock = new BN(saleConf.startBlock, 10);
-    tokenConf.initialAmount = new BN(tokenConf.initialAmount, 10);
-    tokensForSale = tokenConf.initialAmount.sub(tokensPreAllocated);
-    
-  });
+    it('should be ended if cap reached', async function () {
+      await this.crowdsale.send(cap)
+      let hasEnded = await this.crowdsale.hasEnded()
+      hasEnded.should.equal(true)
+    })
 
-  describe(`Initial token issuance`, () => {
-    it(`should instantiate preBuyers with the proper number of tokens.`, () =>
-      Promise.all(
-        Object.keys(preBuyersConf).map((curr, i, arr) =>
-          new Promise((resolve, reject) =>
-            getTokenBalanceOf(preBuyersConf[curr].address)
-            .then((balance) =>{
-              console.log('preBuyeraddress '+ preBuyersConf[curr].address +' Pre Bal '+ balance.toString(10) + ' to be: ' + preBuyersConf[curr].amount.toString(10));
-              resolve(
-                assert.equal(balance.toString(10),
-                preBuyersConf[curr].amount.toString(10),
-                `A preBuyer ${preBuyersConf[curr].address} was instantiated with ` +
-                `an incorrect balance.`)
-              )
-            }
-            )
-            .catch((err) => reject(err))
-          )
-        )
-      )
-    );
-    it(`should instantiate founders with the proper number of tokens.`, () =>
-    Promise.all(
-      Object.keys(foundersConf.founders).map((curr, i, arr) =>
-        new Promise((resolve, reject) =>
-          getTokenBalanceOf(foundersConf.founders[curr].address)
-          .then((balance) =>{
-            console.log('foundersaddress '+ foundersConf.founders[curr].address +' Pre Bal '+ balance.toString(10) + ' to be: ' + foundersConf.founders[curr].amount.toString(10));
-            resolve(
-              assert.equal(balance.toString(10),
-              foundersConf.founders[curr].amount.toString(10),
-              `A founder ${foundersConf.founders[curr].address} was instantiated with ` +
-              `an incorrect balance.`)
-            )
-          }
-          )
-          .catch((err) => reject(err))
-        )
-      )
-    )
-  );
-    it(`should instantiate the public sale with the total supply of tokens ` +
-       `minus the sum of tokens pre-sold.`, () =>
-      new Promise((resolve, reject) =>
-        getTokenBalanceOf(Sale.address)
-        .then((balance) =>
-          resolve(
-            assert.equal(balance.toString(10),
-            tokensForSale.toString(10),
-            `The sale contract was not given the correct number of tokens to sell`)
-          )
-        )
-        .catch((err) => reject(err))
-      )
-    );
-  });
-  describe(`Instantiation`, () => {
-    it(`should instantiate with the price set to ${saleConf.price} Wei.`, () =>
-      new Promise((resolve, reject) =>
-        Sale.deployed()
-        .then((instance) => instance.price.call())
-        .then((price) =>
-          resolve(
-            assert.equal(price.toString(10), saleConf.price.toString(10),
-            `The price was not instantiated properly.`)
-          )
-        )
-        .catch((err) => reject(err))
-      )
-    );
-    it(`should instantiate with the owner set to ${saleConf.owner}.`, () =>
-      new Promise((resolve, reject) =>
-        Sale.deployed()
-        .then((sale) => sale.owner.call())
-        .then((owner) =>
-          resolve(
-            assert.equal(owner.valueOf(), saleConf.owner,
-            `The owner was not instantiated properly.`)
-          )
-        )
-        .catch((err) => reject(err))
-      )
-    );
-    it(`should instantiate with the wallet set to ${saleConf.wallet}.`, () =>
-      new Promise((resolve, reject) =>
-        Sale.deployed()
-        .then((sale) => sale.wallet.call())
-        .then((wallet) =>
-          resolve(
-            assert.equal(wallet.valueOf(), saleConf.wallet.toLowerCase(),
-            `The wallet was not instantiated properly.`)
-          )
-        )
-        .catch((err) => reject(err))
-      )
-    );
-    it(`should instantiate with the startBlock set to ${saleConf.startBlock}.`, () =>
-      new Promise((resolve, reject) =>
-        Sale.deployed()
-        .then((sale) => sale.startBlock.call())
-        .then((startBlock) =>
-          resolve(
-            assert.equal(startBlock.toString(10),
-            saleConf.startBlock.toString(10),
-            `The startBlock was not instantiated properly.`)
-          )
-        )
-        .catch((err) => reject(err))
-      )
-    );
-  });
- 
-});
+  })
+
+})

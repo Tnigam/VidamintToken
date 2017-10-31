@@ -17,7 +17,7 @@ contract vidamintSale is CappedCrowdsale,RefundableCrowdsale,Pausable
     //As goal needs to be met for a successful crowdsale
     //the value needs to less or equal than a cap which is limit for accepted funds
     require(_goal <= _cap);
-    //pause();
+    pause();
   }
   bool public preSaleTokensDisbursed = false;
   bool public foundersTokensDisbursed = false;

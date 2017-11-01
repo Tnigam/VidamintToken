@@ -2,14 +2,14 @@ pragma solidity ^0.4.11;
 
 import "zeppelin-solidity/contracts/math/SafeMath.sol";
 import "./UpgradeableToken.sol";
-import 'zeppelin-solidity/contracts/token/MintableToken.sol';
+import 'zeppelin-solidity/contracts/token/StandardToken.sol';
 
 /**
  * A sample token that is used as a migration testing target.
  *
  * This is not an actual token, but just a stub used in testing.
  */
-contract TestMigrationTarget is StandardToken, UpgradeAgent {
+contract vidamintTokenMigration is StandardToken, UpgradeAgent {
 
   using SafeMath for uint256;
 
@@ -17,7 +17,7 @@ contract TestMigrationTarget is StandardToken, UpgradeAgent {
 
   uint256 public originalSupply;
 
-  function TestMigrationTarget(UpgradeableToken _oldToken) {
+  function vidamintTokenMigration(UpgradeableToken _oldToken) {
 
     oldToken = _oldToken;
 

@@ -52,7 +52,7 @@ contract vidamintSale is CappedCrowdsale,RefundableCrowdsale,Pausable
   }
    
   function createTokenContract()  internal returns (MintableToken) {
-   return  new vidamintToken();
+   return  new vidamintToken(msg.sender);
   }
 
     /// @dev distributeFoundersRewards(): private utility function called by constructor

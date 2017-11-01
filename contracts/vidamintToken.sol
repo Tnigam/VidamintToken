@@ -7,8 +7,11 @@ contract vidamintToken is MintableToken,UpgradeableToken  {
   uint8 public constant decimals = 9;
   string public constant version="V0.1";  
   
-  function vidamintToken()
-    UpgradeableToken(msg.sender) {
+  function vidamintToken(address _owner)
+    UpgradeableToken(_owner) {
+    owner = _owner;
+   // totalSupply = 2 * (10**18); // need to enable to test migration
+   // balances[owner] = 2 * (10**18); // need to enable to test migration
   }  
  
 }

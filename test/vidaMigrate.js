@@ -74,7 +74,7 @@ contract('Crowdsale', function ([_, investor, wallet, purchaser]) {
   })
 
     it('supply should be transferred', async function () {
-        this.tkSupply2.should.be.bignumber.equal(this.tkSupply)
+       this.tkSupply2.should.be.bignumber.equal(this.tkSupply)
     }) 
 
 })

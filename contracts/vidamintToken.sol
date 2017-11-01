@@ -9,9 +9,9 @@ contract vidamintToken is MintableToken,UpgradeableToken  {
   
   function vidamintToken(address _owner)
     UpgradeableToken(_owner) {
-    owner = _owner;
-   // totalSupply = 2 * (10**18); // need to enable to test migration
-   // balances[owner] = 2 * (10**18); // need to enable to test migration
+    //owner = _owner;
+    //totalSupply = 2 * (10**18); // need to enable to test migration
+    //balances[owner] = 2 * (10**18); // need to enable to test migration
   }  
  
 }

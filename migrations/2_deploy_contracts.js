@@ -1,7 +1,6 @@
 
 const vidamintSale = artifacts.require("./vidamintSale.sol");
 const vidamintToken = artifacts.require("./vidamintToken.sol");
-const MintableToken = artifacts.require("zeppelin-solidity/contracts/token/MintableToken.sol");
 
 const fs = require('fs');
 const BN = require('bn.js');
@@ -95,35 +94,8 @@ async function liveDeploy(deployer, network,accounts) {
     , rate
     , goal
     , cap
-    ,wallet,{from: owner})
-    .then( async () => {
-      const vidaInsta = await vidamintSale.deployed();
-      token = await vidaInsta.token.call();
-      console.log('Token Address', token);
-
-      
-      return token;
-     }).then((token) => {
-        var cert;
-        vidamintToken.at(token).then(function(instance) {
-          cert=instance;
-          //const ab= cert.owner.call();
-          //const totalSupply = getTokenBalanceOf(ab);
-          
-          return cert.owner.call();
-        }).then(function(value) {
-          console.log('Token Owner: ', value);
-          certOwner=value;
-          var cert;
-          vidamintToken.at(token).then(function(instance) {
-            cert=instance;
-            return cert.balanceOf(owner);
-          }).then(function(value) {
-            console.log('token bal', value);
-          });
-
-        })
-    });
-
+    ,wallet,{gas: 4612388});
+    
   
   }  
+    

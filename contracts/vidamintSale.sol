@@ -1,11 +1,12 @@
 pragma solidity ^0.4.11;
-import 'zeppelin-solidity/contracts/crowdsale/CappedCrowdsale.sol';
-import 'zeppelin-solidity/contracts/crowdsale/RefundableCrowdsale.sol';
-import 'zeppelin-solidity/contracts/token/MintableToken.sol';
-import 'zeppelin-solidity/contracts/token/TokenTimelock.sol';
+import './vidamintToken.sol';
 import 'zeppelin-solidity/contracts/token/ERC20Basic.sol';
 import 'zeppelin-solidity/contracts/lifecycle/Pausable.sol';
-import './vidamintToken.sol';
+import 'zeppelin-solidity/contracts/token/MintableToken.sol';
+import 'zeppelin-solidity/contracts/token/TokenTimelock.sol';
+import 'zeppelin-solidity/contracts/crowdsale/CappedCrowdsale.sol';
+import 'zeppelin-solidity/contracts/crowdsale/RefundableCrowdsale.sol';
+
 contract vidamintSale is CappedCrowdsale,RefundableCrowdsale,Pausable 
  {
   function vidamintSale(uint256 _startTime, uint256 _endTime, uint256 _rate,uint256 _goal, uint256 _cap, address _wallet)

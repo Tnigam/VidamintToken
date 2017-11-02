@@ -3,7 +3,8 @@ require('babel-polyfill');
 
 var provider;
 var HDWalletProvider = require('truffle-hdwallet-provider');
-var mnemonic = '[REDACTED]';
+var mnemonic = 'beauty notable increase opera double hire witness solar casino dash habit filter';
+var infura_apikey = "P6LEmOqq2Q6EvqtzK2YS";
 
 if (!process.env.SOLIDITY_COVERAGE){
   provider = new HDWalletProvider(mnemonic, 'https://ropsten.infura.io/')
@@ -20,9 +21,10 @@ module.exports = {
       gasPrice: 0x01
     },
     ropsten: {
-      host: 'localhost',
-      port: 8545,
-      network_id: 3 // official id of the ropsten network
+      provider: new HDWalletProvider(mnemonic, "https://ropsten.infura.io/"+infura_apikey),
+      network_id: 3,
+      gas: 4612388,
+      gasPrice: 25000000000
     },
     coverage: {
       host: "localhost",

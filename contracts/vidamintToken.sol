@@ -5,7 +5,7 @@ contract VidamintToken is MintableToken,UpgradeableToken  {
   string public constant  name="vidamint";
   string public constant symbol = "VIDA";
   uint8 public constant decimals = 18;
-  string public constant version="V0.1";  
+  string public constant version="V1.0";  
     /** Name and symbol were updated. */
   //event UpdatedTokenInformation(string newName, string newSymbol, string _version);
 

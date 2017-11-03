@@ -24,7 +24,7 @@ contract('Crowdsale', function ([_, investor, wallet, purchaser]) {
 
   beforeEach(async function () {
     
-    const rate = new BigNumber(1000)
+    const rate = new BigNumber(1)
     const value = ether(42)
     const goal = ether(100)
     const cap = ether(300)
@@ -33,9 +33,9 @@ contract('Crowdsale', function ([_, investor, wallet, purchaser]) {
     this.startTime = latestTime() + duration.weeks(1);
     this.endTime =   this.startTime + duration.weeks(1);
     this.afterEndTime = this.endTime + duration.seconds(1)
+    this.owner ='0xdf08f82de32b8d460adbe8d72043e3a7e25a3b39';
   
-  
-    this.crowdsale = await Crowdsale.new(this.startTime, this.endTime, rate, goal,cap,wallet)
+    this.crowdsale = await Crowdsale.new(this.owner,this.startTime, this.endTime, rate, goal,cap,wallet)
     const cToken = await this.crowdsale.token();
     this.token = MintableToken.at(cToken);
     console.log('cToken ' + cToken);

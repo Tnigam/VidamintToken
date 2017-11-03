@@ -63,7 +63,7 @@ contract VidamintSale is CappedCrowdsale,Pausable
     // update state
     weiRaised = weiRaised.add(weiAmount);
     
-   // tokens = tokens.mul(10**uint(18));
+    //tokens = tokens.mul(10**uint(18));
     require(tokens != 0);
     
     token.mint(beneficiary, tokens);

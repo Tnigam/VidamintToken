@@ -66,12 +66,14 @@ module.exports = function(deployer) {
   const owner =  saleConf.owner;
   const wallet = saleConf.wallet;
   console.log([owner, startTime, endTime,rate,goal,cap,wallet]);
-  vidamintSale.at('0x32E13a59Aa6BB1704CD26aF375E85e75FBE4ED77').then(function(instance) {
+  vidamintSale.at('0xfe8eb436d17e7f443755e15174a80e60d00aaced').then(function(instance) {
     console.log(instance.address);
     //instance.preSaleToggle();
-    //instance.changePrice(2500);
-    instance.changeStartdate(1509519600); 
-    //instance.distributePreBuyersRewards(preBuyers,preBuyersTokens,{gas: 4700000});
+    //instance.changeRate(2500);
+    //return instance.weiRaised.call();
+    //instance.send(1000000000);
+    instance.changeStartTime(1509519600); 
+    //return instance.distributePreBuyersRewards(preBuyers,preBuyersTokens,{gas: 4700000});
   }).then(function(result) {
     // If this callback is called, the transaction was successfully processed.
     console.log('result: '+ result)

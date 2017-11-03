@@ -16,7 +16,7 @@ const MintableToken = artifacts.require('MintableToken')
 
 contract('CappedCrowdsale', function ([_, wallet]) {
 
-  const rate = new BigNumber(1000)
+  const rate = new BigNumber(1)
 
   const cap = ether(300)
   const goal = ether(100)
@@ -24,14 +24,15 @@ contract('CappedCrowdsale', function ([_, wallet]) {
 
   before(async function() {
     //Advance to the next block to correctly read time in the solidity "now" function interpreted by testrpc
-   // await advanceBlock()
+    await advanceBlock()
   })
 
   beforeEach(async function () {
     this.startTime = latestTime() + duration.weeks(1);
     this.endTime =   this.startTime + duration.weeks(1);
+    this.owner ='0xdf08f82de32b8d460adbe8d72043e3a7e25a3b39';
 
-    this.crowdsale = await CappedCrowdsale.new(this.startTime, this.endTime, rate,goal, cap,wallet)
+    this.crowdsale = await CappedCrowdsale.new(this.owner ,this.startTime, this.endTime, rate,goal, cap,wallet)
 
     this.token = MintableToken.at(await this.crowdsale.token())
   })
@@ -39,7 +40,7 @@ contract('CappedCrowdsale', function ([_, wallet]) {
   describe('creating a valid crowdsale', function () {
 
     it('should fail with zero cap', async function () {
-      await CappedCrowdsale.new(this.startTime, this.endTime, rate, goal , 0, wallet).should.be.rejectedWith(EVMThrow);
+      await CappedCrowdsale.new(this.owner, this.startTime, this.endTime, rate, goal , 0, wallet).should.be.rejectedWith(EVMThrow);
     })
 
   });

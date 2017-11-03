@@ -20,7 +20,7 @@ contract VidamintSale is CappedCrowdsale,Pausable
     address _wallet)
     CappedCrowdsale(_cap)
     //FinalizableCrowdsale()
-   // RefundableCrowdsale(_goal)
+    //RefundableCrowdsale(_goal)
     Crowdsale(_startTime, _endTime, _rate, _wallet)
   {
     //As goal needs to be met for a successful crowdsale
@@ -63,7 +63,7 @@ contract VidamintSale is CappedCrowdsale,Pausable
     // update state
     weiRaised = weiRaised.add(weiAmount);
     
-    tokens = tokens.mul(10**uint(18));
+   // tokens = tokens.mul(10**uint(18));
     require(tokens != 0);
     
     token.mint(beneficiary, tokens);

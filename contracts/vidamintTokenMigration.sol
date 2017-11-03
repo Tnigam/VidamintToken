@@ -38,7 +38,7 @@ contract vidamintTokenMigration is StandardToken, UpgradeAgent {
 
     // Mint new tokens to the migrator
     totalSupply = totalSupply.add(_value);
-    balances[_from] = balances[_from].add(_value);
+    //balances[_from] = balances[_from].add(_value);
     Transfer(0, _from, _value);
   }
 

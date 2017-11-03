@@ -19,8 +19,9 @@ Web3EthAbi.encodeParameters(['address'],[0x0015B111f899FB6B11b6c3b1A4DB652Ce9CbC
 solidity_flattener --output ../vidamint temp/vidamintSale_flat.sol ./contracts/vidamintSale.sol
  
 truffle exec ./scripts/releasePreMineTokens.js --network ropsten
-
-
+truffle test .\test\VidaCappedCrowdsale.js
+truffle test .\test\VidaCrowdsale.js
+truffle test .\test\vidaMigrate.js
 
  Web3EthAbi.encodeParameters(['uint256', 'uint256' , 'uint256' ,'uint256','uint256','address'],values);
  '0x0000000000000000000000000000000000000000000000000000000059f26a900000000000000000000000000000000000000000000000000000000059fba51000000000000000000000000000000000000000000000000000000000000009c400000000000

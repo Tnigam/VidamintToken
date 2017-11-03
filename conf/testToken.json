@@ -1,7 +1,7 @@
 {
   "initialAmount": "1000000000000000000",
   "tokenName": "vidamint",
-  "decimalUnits": "9",
+  "decimalUnits": "18",
   "tokenSymbol": "VIDA"
 }
 

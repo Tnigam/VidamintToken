@@ -35,13 +35,14 @@ async function liveDeploy(deployer, network,accounts) {
   let tokenConf;
   let preBuyersConf;
   let foundersConf;
-  const [owner, james, miguel, edwhale] = accounts;
+  //let owner;
+  const [edward, james, miguel, edwhale] = accounts;
   if (network === 'development') {
     saleConf = JSON.parse(fs.readFileSync('./conf/testSale.json'));
     tokenConf = JSON.parse(fs.readFileSync('./conf/testToken.json'));
     preBuyersConf = JSON.parse(fs.readFileSync('./conf/testPreBuyers.json'));
     foundersConf = JSON.parse(fs.readFileSync('./conf/testFounders.json'));
-    saleConf.owner = owner;
+    //saleConf.owner = owner;
     fs.writeFileSync('./conf/testSale.json', JSON.stringify(saleConf, null, '  '));
 
     let i = 10; // We use addresses from 0-3 for actors in the tests.
@@ -85,7 +86,7 @@ async function liveDeploy(deployer, network,accounts) {
   //const endTime =  startTime + duration.weeks(1);
   const cap = saleConf.cap;
   const goal=  saleConf.goal; 
- // const owner =  saleConf.owner;
+  const owner =  saleConf.owner;
   const wallet = saleConf.wallet;
   console.log([owner, startTime, endTime,rate,goal,cap,wallet]);
   // uint256 _startTime, uint256 _endTime, uint256 _rate, uint256, _cap, uint256 _goal, address _wallet) 
@@ -103,8 +104,11 @@ async function liveDeploy(deployer, network,accounts) {
     .then((vidamintSale) => vidamintSale.distributePreBuyersRewards(
       preBuyers,
       preBuyersTokens,{gas: 4700000}
-    ));  
+    ))
+    .then(() => vidamintSale.deployed())
+    .then((vidamintSale) => {
+      console.log('vidamintSale.address '+ vidamintSale.address);
+    });  
     
-  
   }  
     

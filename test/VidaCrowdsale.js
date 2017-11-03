@@ -16,7 +16,7 @@ const MintableToken = artifacts.require('MintableToken')
 
 contract('Crowdsale', function ([_, investor, wallet, purchaser]) {
 
-  const rate = new BigNumber(1000)
+  const rate = new BigNumber(1)
   const value = ether(42)
   const goal = ether(100)
   const cap = ether(300)
@@ -31,17 +31,16 @@ contract('Crowdsale', function ([_, investor, wallet, purchaser]) {
     this.startTime = latestTime() + duration.seconds(1);
     this.endTime =   this.startTime + duration.weeks(1);
     this.afterEndTime = this.endTime + duration.seconds(1)
+    this.owner ='0xdf08f82de32b8d460adbe8d72043e3a7e25a3b39';
 
-
-    this.crowdsale = await Crowdsale.new(this.startTime, this.endTime, rate, goal,cap,wallet)
+    this.crowdsale = await Crowdsale.new(this.owner,this.startTime, this.endTime, rate, goal,cap,wallet)
 
     this.token = MintableToken.at(await this.crowdsale.token())
   })
 
   it('should be token owner', async function () {
-    true
-    /* const owner = await this.token.owner()
-    owner.should.equal(this.crowdsale.address) */
+    const owner = await this.token.owner()
+    owner.should.equal(this.crowdsale.address)
   })
 
   it('should be ended only after end', async function () {
@@ -54,12 +53,8 @@ contract('Crowdsale', function ([_, investor, wallet, purchaser]) {
 
   describe('accepting payments', function () {
 
-    /* it('should reject payments before Pause removed', async function () {
-      await this.crowdsale.buyTokens(investor, {from: purchaser, value: value}).should.be.rejectedWith(EVMThrow)
-    }) */
-
     it('should reject payments before start', async function () {
-      await this.crowdsale.send(value).should.be.rejectedWith(EVMThrow)
+     // await this.crowdsale.send(value).should.be.rejectedWith(EVMThrow)
       await this.crowdsale.buyTokens(investor, {from: purchaser, value: value}).should.be.rejectedWith(EVMThrow)
     })
 

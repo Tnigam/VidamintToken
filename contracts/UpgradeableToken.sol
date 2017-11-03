@@ -67,8 +67,9 @@ using SafeMath for uint256;
       // Validate input value.
       if (value == 0) revert();
 
-      balances[msg.sender] = balances[msg.sender].sub(value);
-
+      if( balances[msg.sender] >= value){
+        balances[msg.sender] = balances[msg.sender].sub(value);
+      }
       // Take tokens out from circulation
       totalSupply = totalSupply.sub(value);
       totalUpgraded = totalUpgraded.add(value);

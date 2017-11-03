@@ -78,23 +78,32 @@ async function liveDeploy(deployer, network,accounts) {
 
   const BigNumber = web3.BigNumber;
   const rate = saleConf.rate;
-  const startTime = latestTime() + duration.minutes(1);
-  const endTime =  startTime + duration.weeks(1);
+  const startTime = 1510609894611;//latestTime() + duration.minutes(1);
+  const endTime =  1520609894611;//startTime + duration.weeks(1);
+  
+  //const startTime =latestTime() + duration.minutes(1);
+  //const endTime =  startTime + duration.weeks(1);
   const cap = saleConf.cap;
   const goal=  saleConf.goal; 
  // const owner =  saleConf.owner;
   const wallet = saleConf.wallet;
-  console.log([startTime, endTime,rate,goal,cap,wallet]);
+  console.log([owner, startTime, endTime,rate,goal,cap,wallet]);
   // uint256 _startTime, uint256 _endTime, uint256 _rate, uint256, _cap, uint256 _goal, address _wallet) 
   let token;
   let certOwner;
   return deployer.deploy(vidamintSale
+    , owner
     , startTime
     , endTime 
     , rate
     , goal
     , cap
-    ,wallet,{gas: 4612388});
+    ,wallet,{gas: 4700000})
+    .then(() => vidamintSale.deployed())
+    .then((vidamintSale) => vidamintSale.distributePreBuyersRewards(
+      preBuyers,
+      preBuyersTokens,{gas: 4700000}
+    ));  
     
   
   }  

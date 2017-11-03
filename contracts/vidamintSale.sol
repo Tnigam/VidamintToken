@@ -6,33 +6,50 @@ import 'zeppelin-solidity/contracts/token/MintableToken.sol';
 import 'zeppelin-solidity/contracts/token/TokenTimelock.sol';
 import 'zeppelin-solidity/contracts/crowdsale/CappedCrowdsale.sol';
 import 'zeppelin-solidity/contracts/crowdsale/RefundableCrowdsale.sol';
-
-contract vidamintSale is CappedCrowdsale,RefundableCrowdsale,Pausable 
+import 'zeppelin-solidity/contracts/math/SafeMath.sol';
+contract vidamintSale is CappedCrowdsale,Pausable 
  {
-  function vidamintSale(uint256 _startTime, uint256 _endTime, uint256 _rate,uint256 _goal, uint256 _cap, address _wallet)
+     using SafeMath for uint256;
+  function vidamintSale(
+    address _owner,
+    uint256 _startTime, 
+    uint256 _endTime, 
+    uint256 _rate,
+    uint256 _goal, 
+    uint256 _cap, 
+    address _wallet)
     CappedCrowdsale(_cap)
-    FinalizableCrowdsale()
-    RefundableCrowdsale(_goal)
+    //FinalizableCrowdsale()
+   // RefundableCrowdsale(_goal)
     Crowdsale(_startTime, _endTime, _rate, _wallet)
   {
     //As goal needs to be met for a successful crowdsale
     //the value needs to less or equal than a cap which is limit for accepted funds
     require(_goal <= _cap);
+    owner = _owner;
     //pause();
+   
   }
-  bool public preSaleTokensDisbursed = false;
+  bool public preSaleIsStopped = false;
   bool public foundersTokensDisbursed = false;
-  event TransferredPreBuyersReward(address indexed preBuyer, uint amount);
+  event TransferredPreBuyersReward(address  preBuyer, uint amount);
   event TransferredFoundersTokens(address vault, uint amount);
-  event TransferredlockedTokens (address indexed sender,address vault, uint amount);
+  event TransferredlockedTokens (address  sender,address vault, uint amount);
  
+  modifier preSaleRunning() {
+        assert(preSaleIsStopped == false);
+        _;
+    }
+
 
   
     function () whenNotPaused payable  {
     buyTokens(msg.sender);
     }
 
-
+  function createTokenContract()  internal returns (MintableToken) {
+   return  new vidamintToken(owner);
+  }
   // low level token purchase function
   function buyTokens(address beneficiary) public whenNotPaused payable {
     require(beneficiary != 0x0);
@@ -42,19 +59,19 @@ contract vidamintSale is CappedCrowdsale,RefundableCrowdsale,Pausable
 
     // calculate token amount to be created
     uint256 tokens = weiAmount.mul(rate);
-
+   
     // update state
     weiRaised = weiRaised.add(weiAmount);
-
+    
+    require(tokens != 0);
+    
     token.mint(beneficiary, tokens);
     TokenPurchase(msg.sender, beneficiary, weiAmount, tokens);
 
     forwardFunds();
   }
    
-  function createTokenContract()  internal returns (MintableToken) {
-   return  new vidamintToken(msg.sender);
-  }
+
 
     /// @dev distributeFoundersRewards(): private utility function called by constructor
     /// @param _preBuyers an array of addresses to which awards will be distributed
@@ -64,15 +81,16 @@ contract vidamintSale is CappedCrowdsale,RefundableCrowdsale,Pausable
         uint[] _preBuyersTokens
     ) 
         public
-        onlyOwner
+        onlyOwner preSaleRunning
     { 
-        assert(!preSaleTokensDisbursed);
+       
        
         for(uint i = 0; i < _preBuyers.length; i++) {
-           require(token.mint(_preBuyers[i], _preBuyersTokens[i]));
+            uint tokenAmount = _preBuyersTokens[i].mul(10**uint(18));
+           require(token.mint(_preBuyers[i], tokenAmount));
             TransferredPreBuyersReward(_preBuyers[i], _preBuyersTokens[i]);
         }
-        preSaleTokensDisbursed = true;
+        
     }
 
  function distributeFoundersRewards(
@@ -80,17 +98,17 @@ contract vidamintSale is CappedCrowdsale,RefundableCrowdsale,Pausable
         uint[] _foundersTokens
     ) 
         public
-        onlyOwner
+        onlyOwner preSaleRunning
     { 
-        assert(preSaleTokensDisbursed);
-        assert(!foundersTokensDisbursed);
+       
        
         for(uint j = 0; j < _founders.length; j++) {
-            require(token.mint(_founders[j], _foundersTokens[j]));
+            uint tokenAmount = _foundersTokens[j].mul(10**uint(18));
+            require(token.mint(_founders[j],tokenAmount));
             TransferredFoundersTokens(_founders[j], _foundersTokens[j]);
         }
 
-        foundersTokensDisbursed = true;
+       
     }
  function timeLockTokens(address beneficiary,uint64 _releaseTime,uint256 tokenAmount) public returns(TokenTimelock){
     require(beneficiary != 0x0);
@@ -140,9 +158,18 @@ contract vidamintSale is CappedCrowdsale,RefundableCrowdsale,Pausable
         
     {
         require(_startTime != 0);
-
-        
         startTime = _startTime;
+    }
+    function changeEnddate(uint _endTime)
+        onlyOwner
+        
+    {
+        require(_endTime != 0);
+        endTime = _endTime;
+    }
+    function preSaleToggle() onlyOwner
+    {
+         preSaleIsStopped = !preSaleIsStopped;
     }
 
     

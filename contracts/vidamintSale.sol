@@ -7,10 +7,10 @@ import 'zeppelin-solidity/contracts/token/TokenTimelock.sol';
 import 'zeppelin-solidity/contracts/crowdsale/CappedCrowdsale.sol';
 import 'zeppelin-solidity/contracts/crowdsale/RefundableCrowdsale.sol';
 import 'zeppelin-solidity/contracts/math/SafeMath.sol';
-contract vidamintSale is CappedCrowdsale,Pausable 
+contract VidamintSale is CappedCrowdsale,Pausable 
  {
      using SafeMath for uint256;
-  function vidamintSale(
+  function VidamintSale(
     address _owner,
     uint256 _startTime, 
     uint256 _endTime, 
@@ -48,7 +48,7 @@ contract vidamintSale is CappedCrowdsale,Pausable
     }
 
   function createTokenContract()  internal returns (MintableToken) {
-   return  new vidamintToken(owner);
+   return  new VidamintToken(owner);
   }
   // low level token purchase function
   function buyTokens(address beneficiary) public whenNotPaused payable {
@@ -63,6 +63,7 @@ contract vidamintSale is CappedCrowdsale,Pausable
     // update state
     weiRaised = weiRaised.add(weiAmount);
     
+    tokens = tokens.mul(10**uint(18));
     require(tokens != 0);
     
     token.mint(beneficiary, tokens);
@@ -137,7 +138,7 @@ contract vidamintSale is CappedCrowdsale,Pausable
         owner = _newOwner;
     }
 
-    function changePrice(uint _newRate)
+    function changeRate(uint _newRate)
         onlyOwner
         
     {
@@ -153,14 +154,14 @@ contract vidamintSale is CappedCrowdsale,Pausable
         wallet = _wallet;
     }
 
-    function changeStartdate(uint _startTime)
+    function changeStartTime(uint _startTime)
         onlyOwner
         
     {
         require(_startTime != 0);
         startTime = _startTime;
     }
-    function changeEnddate(uint _endTime)
+    function changeEndTime(uint _endTime)
         onlyOwner
         
     {

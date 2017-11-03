@@ -5,58 +5,35 @@ const MintableToken = artifacts.require("zeppelin-solidity/contracts/token/Minta
 
 const fs = require('fs');
 const BN = require('bn.js');
-
- 
-module.exports = function(deployer, network, accounts) {
-  return liveDeploy(deployer, network, accounts);
-}; 
-
-function latestTime() {
-  return web3.eth.getBlock('latest').timestamp;
-}
-function getTokenBalanceOf(actor) {
-  return vidamintSale.deployed()
-  .then((sale) => sale.token.call())
-  .then((tokenAddr) => vidamintToken.at(tokenAddr))
-  .then((token) => token.balanceOf.call(actor))
-  .then((balance) => new BN(balance.valueOf(), 10))
-  .catch((err) => { throw new Error(err); });
-}
-const duration = {
-  seconds: function(val) { return val},
-  minutes: function(val) { return val * this.seconds(60) },
-  hours:   function(val) { return val * this.minutes(60) },
-  days:    function(val) { return val * this.hours(24) },
-  weeks:   function(val) { return val * this.days(7) },
-  years:   function(val) { return val * this.days(365)} 
-};
-
-async function liveDeploy(deployer, network,accounts) {
+module.exports = function(deployer) {
+  function latestTime() {
+    return web3.eth.getBlock('latest').timestamp;
+  }
+  function getTokenBalanceOf(actor) {
+    return vidamintSale.deployed()
+    .then((sale) => sale.token.call())
+    .then((tokenAddr) => vidamintToken.at(tokenAddr))
+    .then((token) => token.balanceOf.call(actor))
+    .then((balance) => new BN(balance.valueOf(), 10))
+    .catch((err) => { throw new Error(err); });
+  }
+  const duration = {
+    seconds: function(val) { return val},
+    minutes: function(val) { return val * this.seconds(60) },
+    hours:   function(val) { return val * this.minutes(60) },
+    days:    function(val) { return val * this.hours(24) },
+    weeks:   function(val) { return val * this.days(7) },
+    years:   function(val) { return val * this.days(365)} 
+  };
   let saleConf;
   let tokenConf;
   let preBuyersConf;
   let foundersConf;
-  const [owner, james, miguel, edwhale] = accounts;
-  if (network === 'development') {
-    saleConf = JSON.parse(fs.readFileSync('./conf/testSale.json'));
-    tokenConf = JSON.parse(fs.readFileSync('./conf/testToken.json'));
-    preBuyersConf = JSON.parse(fs.readFileSync('./conf/testPreBuyers.json'));
-    foundersConf = JSON.parse(fs.readFileSync('./conf/testFounders.json'));
-    saleConf.owner = owner;
-    fs.writeFileSync('./conf/testSale.json', JSON.stringify(saleConf, null, '  '));
 
-    let i = 10; // We use addresses from 0-3 for actors in the tests.
-    for (founder in foundersConf.founders) {
-      foundersConf.founders[founder].address = accounts[i];
-      i += 1;
-    }
-  //  fs.writeFileSync('./conf/testFounders.json', JSON.stringify(foundersConf, null, '  '));
-  } else {
     saleConf = JSON.parse(fs.readFileSync('./conf/sale.json'));
     tokenConf = JSON.parse(fs.readFileSync('./conf/token.json'));
     preBuyersConf = JSON.parse(fs.readFileSync('./conf/preBuyers.json'));
     foundersConf = JSON.parse(fs.readFileSync('./conf/founders.json'));
-  }
 
   const preBuyers = [];
   const preBuyersTokens = [];
@@ -79,51 +56,28 @@ async function liveDeploy(deployer, network,accounts) {
 
   const BigNumber = web3.BigNumber;
   const rate = saleConf.rate;
-  const startTime = latestTime() + duration.minutes(1);
-  const endTime =  startTime + duration.weeks(1);
+  const startTime = 1510609894611;//latestTime() + duration.minutes(1);
+  const endTime =  1520609894611;//startTime + duration.weeks(1);
+  
+  //const startTime =latestTime() + duration.minutes(1);
+  //const endTime =  startTime + duration.weeks(1);
   const cap = saleConf.cap;
   const goal=  saleConf.goal; 
- // const owner =  saleConf.owner;
+  const owner =  saleConf.owner;
   const wallet = saleConf.wallet;
-  console.log([startTime, endTime,rate,goal,cap,wallet]);
-  // uint256 _startTime, uint256 _endTime, uint256 _rate, uint256, _cap, uint256 _goal, address _wallet) 
-  let token;
-  let certOwner;
-  return deployer.deploy(vidamintSale
-    , startTime
-    , endTime 
-    , rate
-    , goal
-    , cap
-    ,wallet,{from: owner})
-    .then( async () => {
-      const vidaInsta = await vidamintSale.deployed();
-      token = await vidaInsta.token.call();
-      console.log('Token Address', token);
+  console.log([owner, startTime, endTime,rate,goal,cap,wallet]);
+  vidamintSale.at('0x32E13a59Aa6BB1704CD26aF375E85e75FBE4ED77').then(function(instance) {
+    console.log(instance.address);
+    //instance.preSaleToggle();
+    //instance.changePrice(2500);
+    instance.changeStartdate(1509519600); 
+    //instance.distributePreBuyersRewards(preBuyers,preBuyersTokens,{gas: 4700000});
+  }).then(function(result) {
+    // If this callback is called, the transaction was successfully processed.
+    console.log('result: '+ result)
+  }).catch(function(e) {
+    console.log(e)
+    // There was an error! Handle it.
+  })
 
-      
-      return token;
-     }).then((token) => {
-        var cert;
-        vidamintToken.at(token).then(function(instance) {
-          cert=instance;
-          //const ab= cert.owner.call();
-          //const totalSupply = getTokenBalanceOf(ab);
-          
-          return cert.owner.call();
-        }).then(function(value) {
-          console.log('Token Owner: ', value);
-          certOwner=value;
-          var cert;
-          vidamintToken.at(token).then(function(instance) {
-            cert=instance;
-            return cert.balanceOf(owner);
-          }).then(function(value) {
-            console.log('token bal', value);
-          });
-
-        })
-    });
-
-  
-  }  
+};

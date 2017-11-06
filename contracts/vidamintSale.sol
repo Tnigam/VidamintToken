@@ -48,7 +48,8 @@ contract VidamintSale is CappedCrowdsale,Pausable
     }
 
   function createTokenContract()  internal returns (MintableToken) {
-   return  new VidamintToken(owner);
+   
+   return  new VidamintToken();
   }
   // low level token purchase function
   function buyTokens(address beneficiary) public whenNotPaused payable {
@@ -130,7 +131,14 @@ contract VidamintSale is CappedCrowdsale,Pausable
      /*
      * Owner-only functions
      */
-   
+   function changeTokenUpgradeMaster(address _upgradeMaster)
+        onlyOwner
+    {
+        require(_upgradeMaster != 0);
+        VidamintToken tokenInstance = VidamintToken(token);
+        tokenInstance.setUpgradeMaster(_upgradeMaster);
+    }
+
     function changeOwner(address _newOwner)
         onlyOwner
     {

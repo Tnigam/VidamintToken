@@ -100,15 +100,18 @@ async function liveDeploy(deployer, network,accounts) {
     , goal
     , cap
     ,wallet,{gas: 4700000})
-    .then(() => vidamintSale.deployed())
+    /* .then(() => vidamintSale.deployed())
     .then((vidamintSale) => vidamintSale.distributePreBuyersRewards(
       preBuyers,
       preBuyersTokens,{gas: 4700000}
-    ))
+    )) */
     .then(() => vidamintSale.deployed())
-    .then((vidamintSale) => {
-      console.log('vidamintSale.address '+ vidamintSale.address);
-    });  
+    .then( async () => {
+      const vidaInsta = await vidamintSale.deployed();
+      token = await vidaInsta.token.call();
+      console.log('Token Address', token);
+
+     });  
     
   }  
     

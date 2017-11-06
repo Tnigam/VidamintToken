@@ -2,6 +2,7 @@
 const vidamintSale = artifacts.require("./vidamintSale.sol");
 const vidamintToken = artifacts.require("./vidamintToken.sol");
 const MintableToken = artifacts.require("zeppelin-solidity/contracts/token/MintableToken.sol");
+const VidamintTokenMigration = artifacts.require('vidamintTokenMigration');
 
 const fs = require('fs');
 const BN = require('bn.js');
@@ -66,14 +67,17 @@ module.exports = function(deployer) {
   const owner =  saleConf.owner;
   const wallet = saleConf.wallet;
   console.log([owner, startTime, endTime,rate,goal,cap,wallet]);
-  vidamintSale.at('0xfe8eb436d17e7f443755e15174a80e60d00aaced').then(function(instance) {
-    console.log(instance.address);
+  vidamintSale.at('0x028acf20d0c0975e50c6d1875004e4b139fed19c').then(function(instance) {
+    console.log('vidamintSale:' + instance.address);
     //instance.preSaleToggle();
     //instance.changeRate(2500);
     //return instance.weiRaised.call();
+    
+    //return instance.token.totalSupply();
     //instance.send(1000000000);
-    instance.changeStartTime(1509519600); 
+    //instance.changeStartTime(1509519600); 
     //return instance.distributePreBuyersRewards(preBuyers,preBuyersTokens,{gas: 4700000});
+   // return instance.changeTokenUpgradeMaster(owner,{gas: 4700000});
   }).then(function(result) {
     // If this callback is called, the transaction was successfully processed.
     console.log('result: '+ result)
@@ -81,5 +85,21 @@ module.exports = function(deployer) {
     console.log(e)
     // There was an error! Handle it.
   })
+  vidamintToken.at('0xbb5410e767aad35a91049f1ddebaad12e5b316f6').then(function(instance) {
+    //console.log('Token: '+instance.address);
+    
+    //this.vidamintTokenMigration = await VidamintTokenMigration.new(cToken);
+    //return instance.setUpgradeAgent('0x9371ce5b62a47f0c25e315ab2473b6ac371425d9');
+    
+  }).then(function(result) {
+    // If this callback is called, the transaction was successfully processed.
+    console.log('result: '+ result)
+  }).catch(function(e) {
+    console.log(e)
+    // There was an error! Handle it.
+  })
+  
 
 };
+//0x9371ce5b62a47f0c25e315ab2473b6ac371425d9 new tonen 	200000 VIDA
+//0x910907eb8946f328fade71012a67f19701bf6eed iold token

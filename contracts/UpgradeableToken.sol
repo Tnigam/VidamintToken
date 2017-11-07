@@ -5,8 +5,8 @@
  */
 
 pragma solidity ^0.4.15;
-import 'zeppelin-solidity/contracts/token/StandardToken.sol';
-import 'zeppelin-solidity/contracts/math/SafeMath.sol';
+import "zeppelin-solidity/contracts/token/StandardToken.sol";
+import "zeppelin-solidity/contracts/math/SafeMath.sol";
 import "./UpgradeAgent.sol";
 
 /**
@@ -14,124 +14,139 @@ import "./UpgradeAgent.sol";
  *
  * First envisioned by Golem and Lunyr projects.
  */
+
 contract UpgradeableToken is StandardToken {
-using SafeMath for uint256;
-  /** Contract / person who can set the upgrade path. This can be the same as team multisig wallet, as what it is with its default value. */
-  address public upgradeMaster;
+    using SafeMath for uint256;
+    // Contract / person who can set the upgrade path. 
+    // This can be the same as team multisig wallet, as what it is with its default value. 
+    address public upgradeMaster;
 
-  /** The next contract where the tokens will be migrated. */
-  UpgradeAgent public upgradeAgent;
+    /** The next contract where the tokens will be migrated. */
+    UpgradeAgent public upgradeAgent;
 
-  /** How many tokens we have upgraded by now. */
-  uint256 public totalUpgraded;
+    /** How many tokens we have upgraded by now. */
+    uint256 public totalUpgraded;
 
-  /**
-   * Upgrade states.
-   *
-   * - NotAllowed: The child contract has not reached a condition where the upgrade can bgun
-   * - WaitingForAgent: Token allows upgrade, but we don't have a new agent yet
-   * - ReadyToUpgrade: The agent is set, but not a single token has been upgraded yet
-   * - Upgrading: Upgrade agent is set and the balance holders can upgrade their tokens
-   *
-   */
-  enum UpgradeState {Unknown, NotAllowed, WaitingForAgent, ReadyToUpgrade, Upgrading}
+    /**
+    * Upgrade states.
+    *
+    * - NotAllowed: The child contract has not reached a condition where the upgrade can bgun
+    * - WaitingForAgent: Token allows upgrade, but we don't have a new agent yet
+    * - ReadyToUpgrade: The agent is set, but not a single token has been upgraded yet
+    * - Upgrading: Upgrade agent is set and the balance holders can upgrade their tokens
+    *
+    */
+    enum UpgradeState {Unknown, NotAllowed, WaitingForAgent, ReadyToUpgrade, Upgrading}
 
-  /**
-   * Somebody has upgraded some of his tokens.
-   */
-  event Upgrade(address indexed _from, address indexed _to, uint256 _value);
+    /**
+    * Somebody has upgraded some of his tokens.
+    */
+    event Upgrade(address indexed _from, address indexed _to, uint256 _value);
 
-  /**
-   * New upgrade agent available.
-   */
-  event UpgradeAgentSet(address agent);
+    /**
+    * New upgrade agent available.
+    */
+    event UpgradeAgentSet(address agent);
 
-  /**
-   * Do not allow construction without upgrade master set.
-   */
-  function UpgradeableToken(address _upgradeMaster) {
-    upgradeMaster = _upgradeMaster;
-  }
+    /**
+    * Do not allow construction without upgrade master set.
+    */
+    function UpgradeableToken(address _upgradeMaster) {
+        upgradeMaster = _upgradeMaster;
+    }
 
-  /**
-   * Allow the token holder to upgrade some of their tokens to a new contract.
-   */
-  function upgrade(uint256 value) public {
+     /**
+    * Set an upgrade agent that handles
+    */
+    function setUpgradeAgent(address agent) external onlyMaster {
 
-      UpgradeState state = getUpgradeState();
-      if(!(state == UpgradeState.ReadyToUpgrade || state == UpgradeState.Upgrading)) {
-        // Called in a bad state
-        revert();
-      }
+        if (!canUpgrade()) {
+            // The token is not yet in a state that we could think upgrading
+            revert();
+        }
 
-      // Validate input value.
-      if (value == 0) revert();
+        if (agent == 0x0) 
+            revert();
 
-      if( balances[msg.sender] >= value){
-        balances[msg.sender] = balances[msg.sender].sub(value);
-      }
-      // Take tokens out from circulation
-      totalSupply = totalSupply.sub(value);
-      totalUpgraded = totalUpgraded.add(value);
+        // Upgrade has already begun for an agent
+        if (getUpgradeState() == UpgradeState.Upgrading) 
+            revert();
 
-      // Upgrade agent reissues the tokens
-      upgradeAgent.upgradeFrom(msg.sender, value);
-      Upgrade(msg.sender, upgradeAgent, value);
-  }
+        upgradeAgent = UpgradeAgent(agent);
 
-  /**
-   * Set an upgrade agent that handles
-   */
-  function setUpgradeAgent(address agent) onlyMaster external {
+        // Bad interface
+        if (!upgradeAgent.isUpgradeAgent()) 
+            revert();
+      // Make sure that token supplies match in source and target
+        if (upgradeAgent.originalSupply() != totalSupply) 
+            revert(); 
 
-       if(!canUpgrade()) {
-        // The token is not yet in a state that we could think upgrading
-        revert();
-      }
+        UpgradeAgentSet(upgradeAgent);
+    }
 
-      if (agent == 0x0) revert();
+    /**
+    * Get the state of the token upgrade.
+    */
+    function getUpgradeState() public constant returns(UpgradeState) {
+        if (!canUpgrade()) 
+            return UpgradeState.NotAllowed;
+        else if (address(upgradeAgent) == 0x00) 
+                return UpgradeState.WaitingForAgent;
+        else if (totalUpgraded == 0) 
+                return UpgradeState.ReadyToUpgrade;
+        else 
+                return UpgradeState.Upgrading;
+    }
 
-      // Upgrade has already begun for an agent
-      if (getUpgradeState() == UpgradeState.Upgrading) revert();
 
-      upgradeAgent = UpgradeAgent(agent);
 
-      // Bad interface
-      if(!upgradeAgent.isUpgradeAgent()) revert();
-     // Make sure that token supplies match in source and target
-      if (upgradeAgent.originalSupply() != totalSupply) revert(); 
+    /**
+    * Allow the token holder to upgrade some of their tokens to a new contract.
+    */
+    function upgrade(uint256 value) public {
 
-      UpgradeAgentSet(upgradeAgent);
-  }
+        UpgradeState state = getUpgradeState();
+        if (!(state == UpgradeState.ReadyToUpgrade || state == UpgradeState.Upgrading)) {
+          // Called in a bad state
+            revert();
+        }
 
-  /**
-   * Get the state of the token upgrade.
-   */
-  function getUpgradeState() public constant returns(UpgradeState) {
-    if(!canUpgrade()) return UpgradeState.NotAllowed;
-    else if(address(upgradeAgent) == 0x00) return UpgradeState.WaitingForAgent;
-    else if(totalUpgraded == 0) return UpgradeState.ReadyToUpgrade;
-    else return UpgradeState.Upgrading;
-  }
+        // Validate input value.
+        if (value == 0) 
+            revert();
 
-  /**
-   * Change the upgrade master.
-   *
-   * This allows us to set a new owner for the upgrade mechanism.
-   */
-  function setUpgradeMaster(address master) onlyMaster public {
-      if (master == 0x0) revert();
-      upgradeMaster = master;
-  }
+        if (balances[msg.sender] >= value) {
+            balances[msg.sender] = balances[msg.sender].sub(value);
+        }
+        // Take tokens out from circulation
+        totalSupply = totalSupply.sub(value);
+        totalUpgraded = totalUpgraded.add(value);
 
-  /**
-   * Child contract can enable to provide the condition when the upgrade can begun.
-   */
-  function canUpgrade() public constant returns(bool) {
-     return true;
-  }
-modifier onlyMaster() {
-    require(msg.sender == upgradeMaster);
-    _;
-  }
+        // Upgrade agent reissues the tokens
+        upgradeAgent.upgradeFrom(msg.sender, value);
+        Upgrade(msg.sender, upgradeAgent, value);
+    }
+
+    /**
+    * Change the upgrade master.
+    *
+    * This allows us to set a new owner for the upgrade mechanism.
+    */
+    function setUpgradeMaster(address master) public onlyMaster {
+        if (master == 0x0) 
+            revert();
+        upgradeMaster = master;
+    }
+
+    /**
+    * Child contract can enable to provide the condition when the upgrade can begun.
+    */
+    function canUpgrade() public constant returns(bool) {
+        return true;
+    }
+
+    modifier onlyMaster() {
+        require(msg.sender == upgradeMaster);
+        _;
+    }
 }

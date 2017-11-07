@@ -79,11 +79,11 @@ async function liveDeploy(deployer, network,accounts) {
 
   const BigNumber = web3.BigNumber;
   const rate = saleConf.rate;
-  const startTime = 1510609894611;//latestTime() + duration.minutes(1);
-  const endTime =  1520609894611;//startTime + duration.weeks(1);
+ // const startTime = 1510609894611;//latestTime() + duration.minutes(1);
+ // const endTime =  1520609894611;//startTime + duration.weeks(1);
   
-  //const startTime =latestTime() + duration.minutes(1);
-  //const endTime =  startTime + duration.weeks(1);
+  const startTime =latestTime() + duration.minutes(1);
+  const endTime =  startTime + duration.weeks(1);
   const cap = saleConf.cap;
   const goal=  saleConf.goal; 
   const owner =  saleConf.owner;

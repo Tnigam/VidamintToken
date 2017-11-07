@@ -14,7 +14,7 @@ const should = require('chai')
 const Crowdsale = artifacts.require('vidamintSale')
 const MintableToken = artifacts.require('MintableToken')
 
-contract('Crowdsale', function ([_, investor, wallet, purchaser]) {
+contract('Crowdsale', function ([owner, investor, wallet, purchaser]) {
 
   const rate = new BigNumber(1)
   const value = ether(42)
@@ -31,16 +31,16 @@ contract('Crowdsale', function ([_, investor, wallet, purchaser]) {
     this.startTime = latestTime() + duration.seconds(1);
     this.endTime =   this.startTime + duration.weeks(1);
     this.afterEndTime = this.endTime + duration.seconds(1)
-    this.owner ='0xdf08f82de32b8d460adbe8d72043e3a7e25a3b39';
+    //this.owner ='0xdf08f82de32b8d460adbe8d72043e3a7e25a3b39';
 
-    this.crowdsale = await Crowdsale.new(this.owner,this.startTime, this.endTime, rate, goal,cap,wallet)
+    this.crowdsale = await Crowdsale.new(owner,this.startTime, this.endTime, rate, goal,cap,wallet)
 
     this.token = MintableToken.at(await this.crowdsale.token())
   })
 
   it('should be token owner', async function () {
-    const owner = await this.token.owner()
-    owner.should.equal(this.crowdsale.address)
+    const tokenOwner = await this.token.owner()
+    tokenOwner.should.equal(this.crowdsale.address)
   })
 
   it('should be ended only after end', async function () {

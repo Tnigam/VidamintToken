@@ -1,42 +1,61 @@
-
 const vidamintSale = artifacts.require("./vidamintSale.sol");
 const vidamintToken = artifacts.require("./vidamintToken.sol");
 
 const fs = require('fs');
 const BN = require('bn.js');
 
- 
-module.exports = function(deployer, network, accounts) {
+module.exports = function (deployer, network, accounts) {
   return liveDeploy(deployer, network, accounts);
-}; 
-
-function latestTime() {
-  return web3.eth.getBlock('latest').timestamp;
-}
-function getTokenBalanceOf(actor) {
-  return vidamintSale.deployed()
-  .then((sale) => sale.token.call())
-  .then((tokenAddr) => vidamintToken.at(tokenAddr))
-  .then((token) => token.balanceOf.call(actor))
-  .then((balance) => new BN(balance.valueOf(), 10))
-  .catch((err) => { throw new Error(err); });
-}
-const duration = {
-  seconds: function(val) { return val},
-  minutes: function(val) { return val * this.seconds(60) },
-  hours:   function(val) { return val * this.minutes(60) },
-  days:    function(val) { return val * this.hours(24) },
-  weeks:   function(val) { return val * this.days(7) },
-  years:   function(val) { return val * this.days(365)} 
 };
 
-async function liveDeploy(deployer, network,accounts) {
+function latestTime() {
+  return web3
+    .eth
+    .getBlock('latest')
+    .timestamp;
+}
+function getTokenBalanceOf(actor) {
+  return vidamintSale
+    .deployed()
+    .then((sale) => sale.token.call())
+    .then((tokenAddr) => vidamintToken.at(tokenAddr))
+    .then((token) => token.balanceOf.call(actor))
+    .then((balance) => new BN(balance.valueOf(), 10))
+    .catch((err) => {
+      throw new Error(err);
+    });
+}
+const duration = {
+  seconds: function (val) {
+    return val
+  },
+  minutes: function (val) {
+    return val * this.seconds(60)
+  },
+  hours: function (val) {
+    return val * this.minutes(60)
+  },
+  days: function (val) {
+    return val * this.hours(24)
+  },
+  weeks: function (val) {
+    return val * this.days(7)
+  },
+  years: function (val) {
+    return val * this.days(365)
+  }
+};
+
+async function liveDeploy(deployer, network, accounts) {
   let saleConf;
   let tokenConf;
   let preBuyersConf;
   let foundersConf;
-  let rewardeesConf ;
-  const [edward, james, miguel, edwhale] = accounts;
+  //let owner;
+  const [edward,
+    james,
+    miguel,
+    edwhale] = accounts;
   if (network === 'development') {
     saleConf = JSON.parse(fs.readFileSync('./conf/testSale.json'));
     tokenConf = JSON.parse(fs.readFileSync('./conf/testToken.json'));
@@ -51,7 +70,8 @@ async function liveDeploy(deployer, network,accounts) {
       foundersConf.founders[founder].address = accounts[i];
       i += 1;
     }
-  //  fs.writeFileSync('./conf/testFounders.json', JSON.stringify(foundersConf, null, '  '));
+    //  fs.writeFileSync('./conf/testFounders.json', JSON.stringify(foundersConf,
+    // null, '  '));
   } else {
     saleConf = JSON.parse(fs.readFileSync('./conf/sale.json'));
     tokenConf = JSON.parse(fs.readFileSync('./conf/token.json'));
@@ -81,17 +101,26 @@ async function liveDeploy(deployer, network,accounts) {
 
   const BigNumber = web3.BigNumber;
   const rate = saleConf.rate;
-  const startTime = 1510609894611;//latestTime() + duration.minutes(1);
-  const endTime =  1520609894611;//startTime + duration.weeks(1);
-  
- // const startTime =latestTime() + duration.minutes(1);
-  //const endTime =  startTime + duration.weeks(1);
+  // const startTime = 1510609894611;//latestTime() + duration.minutes(1); const
+  // endTime =  1520609894611;//startTime + duration.weeks(1);
+
+  const startTime = latestTime() + duration.minutes(1);
+  const endTime = startTime + duration.weeks(1);
   const cap = saleConf.cap;
-  const goal=  saleConf.goal; 
-  const owner =  saleConf.owner;
+  const goal = saleConf.goal;
+  const owner = saleConf.owner;
   const wallet = saleConf.wallet;
-  console.log([owner, startTime, endTime,rate,goal,cap,wallet]);
-  // uint256 _startTime, uint256 _endTime, uint256 _rate, uint256, _cap, uint256 _goal, address _wallet) 
+  console.log([
+    owner,
+    startTime,
+    endTime,
+    rate,
+    goal,
+    cap,
+    wallet
+  ]);
+  // uint256 _startTime, uint256 _endTime, uint256 _rate, uint256, _cap, uint256
+  // _goal, address _wallet)
   let token;
   let certOwner;
   return deployer.deploy(vidamintSale

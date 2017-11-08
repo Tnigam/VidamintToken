@@ -35,13 +35,14 @@ async function liveDeploy(deployer, network,accounts) {
   let tokenConf;
   let preBuyersConf;
   let foundersConf;
-  //let owner;
+  let rewardeesConf ;
   const [edward, james, miguel, edwhale] = accounts;
   if (network === 'development') {
     saleConf = JSON.parse(fs.readFileSync('./conf/testSale.json'));
     tokenConf = JSON.parse(fs.readFileSync('./conf/testToken.json'));
     preBuyersConf = JSON.parse(fs.readFileSync('./conf/testPreBuyers.json'));
     foundersConf = JSON.parse(fs.readFileSync('./conf/testFounders.json'));
+    rewardeesConf = JSON.parse(fs.readFileSync('./conf/testTimelockTokens.json'));
     //saleConf.owner = owner;
     fs.writeFileSync('./conf/testSale.json', JSON.stringify(saleConf, null, '  '));
 
@@ -56,34 +57,35 @@ async function liveDeploy(deployer, network,accounts) {
     tokenConf = JSON.parse(fs.readFileSync('./conf/token.json'));
     preBuyersConf = JSON.parse(fs.readFileSync('./conf/preBuyers.json'));
     foundersConf = JSON.parse(fs.readFileSync('./conf/founders.json'));
+    rewardeesConf = JSON.parse(fs.readFileSync('./conf/timelockTokens.json'));
   }
 
   const preBuyers = [];
   const preBuyersTokens = [];
   for (recipient in preBuyersConf) {
     preBuyers.push(preBuyersConf[recipient].address);
-    preBuyersTokens.push(new BN(preBuyersConf[recipient].amount, 10));
+    preBuyersTokens.push(new BN(preBuyersConf[recipient].amount, 18));
   }
 
-  const founders = [];
-  const foundersTokens = [];
-  for (recipient in foundersConf.founders) {
-    founders.push(foundersConf.founders[recipient].address);
-    foundersTokens.push(new BN(foundersConf.founders[recipient].amount, 10));
+  const rewardees = [];
+  const rewardeesTokens = [];
+  for (recipient in rewardeesConf.rewardees) {
+    rewardees.push(rewardeesConf.rewardees[recipient].address);
+    rewardeesTokens.push(new BN(rewardeesConf.rewardees[recipient].amount, 18));
   }
 
   const vestingDates = [];
-  for (date in foundersConf.vestingDates) {
-    vestingDates.push(foundersConf.vestingDates[date]);
+  for (date in rewardeesConf.vestingDates) {
+    vestingDates.push(rewardeesConf.vestingDates[date]);
   }
 
   const BigNumber = web3.BigNumber;
   const rate = saleConf.rate;
- // const startTime = 1510609894611;//latestTime() + duration.minutes(1);
- // const endTime =  1520609894611;//startTime + duration.weeks(1);
+  const startTime = 1510609894611;//latestTime() + duration.minutes(1);
+  const endTime =  1520609894611;//startTime + duration.weeks(1);
   
-  const startTime =latestTime() + duration.minutes(1);
-  const endTime =  startTime + duration.weeks(1);
+ // const startTime =latestTime() + duration.minutes(1);
+  //const endTime =  startTime + duration.weeks(1);
   const cap = saleConf.cap;
   const goal=  saleConf.goal; 
   const owner =  saleConf.owner;
@@ -101,10 +103,7 @@ async function liveDeploy(deployer, network,accounts) {
     , cap
     ,wallet,{gas: 4700000})
     /* .then(() => vidamintSale.deployed())
-    .then((vidamintSale) => vidamintSale.distributePreBuyersRewards(
-      preBuyers,
-      preBuyersTokens,{gas: 4700000}
-    )) */
+    .then((vidamintSale) => vidamintSale.distributeTimeLockRewards(rewardees,rewardeesTokens,vestingDates,{gas:4700000}))  */
     .then(() => vidamintSale.deployed())
     .then( async () => {
       const vidaInsta = await vidamintSale.deployed();
@@ -114,4 +113,5 @@ async function liveDeploy(deployer, network,accounts) {
      });  
     
   }  
+    //.then((vidamintSale) => vidamintSale.distributeTimeLockRewards(rewardees,rewardeesTokens,vestingDates)) 
     

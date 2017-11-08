@@ -1,0 +1,21 @@
+{
+  "vestingDates": {
+    "first": "1530018000",
+    "second": "1545742800"
+  },
+  "rewardees": {
+    "0": {
+      "amount": "200",
+      "address": "0x4EC53EE19a11f887BFF0148DE83b6a746a6cF0C9"
+    },
+    "1": {
+      "amount": "339",
+      "address": "0x9cD3622A0379dA721ffbd1e9c9c3f843E71D5cd9"
+    },
+    "2": {
+      "amount": "264",
+      "address": "0xafadbd44b6e32F7C3c645e528cD57062c48220d0"
+    }
+  }
+}
+

@@ -174,7 +174,7 @@ contract TokenVault is Ownable {
   }
 
   /// @dev Claim N bought tokens to the investor as the msg sender
-  function claim() {
+  function claim() public {
 
     address investor = msg.sender;
 

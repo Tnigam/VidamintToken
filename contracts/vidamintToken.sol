@@ -2,7 +2,7 @@ pragma solidity ^0.4.11;
 import "zeppelin-solidity/contracts/token/MintableToken.sol";
 import "./UpgradeableToken.sol";
 import "zeppelin-solidity/contracts/math/SafeMath.sol";
-import "./TokenVault.sol";
+
 
 contract VidamintToken is MintableToken, UpgradeableToken, UpgradeAgent {
     string public constant  name="vidamint";

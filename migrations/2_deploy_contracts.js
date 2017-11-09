@@ -1,5 +1,6 @@
 const vidamintSale = artifacts.require("./vidamintSale.sol");
 const vidamintToken = artifacts.require("./vidamintToken.sol");
+const tokenVault = artifacts.require("./TokenVault.sol");
 
 const fs = require('fs');
 const BN = require('bn.js');
@@ -102,7 +103,7 @@ async function liveDeploy(deployer, network, accounts) {
   const BigNumber = web3.BigNumber;
   const rate = saleConf.rate;
    const startTime = 1510609894611;//latestTime() + duration.minutes(1); const
-   endTime =  1520609894611;//startTime + duration.weeks(1);
+   const endTime =  1520609894611;//startTime + duration.weeks(1);
 
   //const startTime = latestTime() + duration.minutes(1);
   //const endTime = startTime + duration.weeks(1);
@@ -138,6 +139,10 @@ async function liveDeploy(deployer, network, accounts) {
       const vidaInsta = await vidamintSale.deployed();
       token = await vidaInsta.token.call();
       console.log('Token Address', token);
+
+     
+
+
 
      });  
     

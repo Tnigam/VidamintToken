@@ -109,7 +109,7 @@ contract TokenVault is Ownable {
   }
 
   /// @dev Add a presale participating allocation
-  function setInvestor(address investor, uint amount) public {
+  function setInvestor(address investor, uint amount) public onlyOwner{
 
     if(lockedAt > 0) {
       // Cannot add new investors after the vault is locked
@@ -136,7 +136,7 @@ contract TokenVault is Ownable {
   ///      - All balances have been loaded in correctly
   ///      - Tokens are transferred on this vault correctly
   ///      - Checks are in place to prevent creating a vault that is locked with incorrect token balances.
-  function lockit() public {
+  function lock() public onlyOwner{
 
     if(lockedAt > 0) {
       revert(); // Already locked

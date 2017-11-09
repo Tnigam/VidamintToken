@@ -1,17 +1,18 @@
 pragma solidity ^0.4.11;
 import "./vidamintToken.sol";
+import "./TokenVault.sol";
 import "zeppelin-solidity/contracts/lifecycle/Pausable.sol";
 import "zeppelin-solidity/contracts/token/MintableToken.sol";
-import "zeppelin-solidity/contracts/token/TokenTimelock.sol";
+//import "zeppelin-solidity/contracts/token/TokenTimelock.sol";
 import "zeppelin-solidity/contracts/crowdsale/CappedCrowdsale.sol";
-import "zeppelin-solidity/contracts/crowdsale/RefundableCrowdsale.sol";
+//import "zeppelin-solidity/contracts/crowdsale/RefundableCrowdsale.sol";
 import "zeppelin-solidity/contracts/math/SafeMath.sol";
 
 
 contract VidamintSale is CappedCrowdsale, Pausable {
     using SafeMath for uint256;
     bool public preSaleIsStopped = false;
-   // TokenTimelock[] public timelockTokens;
+    address[] public tokenVaults;
     event TransferredPreBuyersReward(address  preBuyer, uint amount);
     event TransferredlockedTokens (address vault, uint amount);
 
@@ -80,28 +81,45 @@ contract VidamintSale is CappedCrowdsale, Pausable {
         }
         
     }
+function createTokenVault(
+        uint64 _freezeEndsAt,
+        uint _tokensToBeAllocated
+    ) public onlyOwner preSaleRunning returns(address){
 
-    function distributeTimeLockRewards(
-        address[] _rewardees,
-        uint[] _rewardeesTokens,
-        uint64[] _rewardeeTimelocks
-    ) public onlyOwner preSaleRunning { 
-       
-    for (uint j = 0; j < _rewardees.length; j++) {
-        uint tokenAmount = _rewardeesTokens[j].mul(10**uint(18));
-        MintableToken newToken = createTokenContract();
-        TokenTimelock timeVault = new TokenTimelock(newToken, _rewardees[j], _rewardeeTimelocks[j]);
-       // timelockTokens.push(timeVault);
-        assert(token.mint(timeVault, tokenAmount));
-        TransferredlockedTokens(_rewardees[j], tokenAmount);
+        TokenVault tokenVault = new TokenVault(owner, _freezeEndsAt, token, _tokensToBeAllocated.mul(10**uint(18)));
+        tokenVaults.push(tokenVault);
+        assert(token.mint(tokenVault, _tokensToBeAllocated.mul(10**uint(18))));
+        return tokenVault;
     }
 
+function distributeTimeLockRewards(
+        address[] _rewardees,
+        uint[] _rewardeesTokens,
+        TokenVault tokenVault
+    ) public onlyOwner preSaleRunning { 
        
+        //function TokenVault(address _owner, uint _freezeEndsAt, StandardToken _token, uint _tokensToBeAllocated)   
+        //TokenVault tokenVault = new TokenVault(owner, _freezeEndsAt, token, _tokensToBeAllocated.mul(10**uint(18)));
+
+        for (uint j = 0; j < _rewardees.length; j++) {
+            uint tokenAmount = _rewardeesTokens[j].mul(10**uint(18));
+            tokenVault.setInvestor(_rewardees[j], tokenAmount);
+            TransferredlockedTokens(_rewardees[j], tokenAmount);
+        }
+
+        
+        //tokenVault.lock();
+       
+    
     }
 
      /*
      * Owner-only functions
      */
+     function getTokenVaultsCount() public constant returns(uint)
+    {
+        return tokenVaults.length;
+    }
     function changeTokenUpgradeMaster(address _upgradeMaster) onlyOwner {
         require(_upgradeMaster != 0);
         VidamintToken tokenInstance = VidamintToken(token);

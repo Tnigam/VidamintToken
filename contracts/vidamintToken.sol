@@ -2,7 +2,7 @@ pragma solidity ^0.4.11;
 import "zeppelin-solidity/contracts/token/MintableToken.sol";
 import "./UpgradeableToken.sol";
 import "zeppelin-solidity/contracts/math/SafeMath.sol";
-
+import "./TokenVault.sol";
 
 contract VidamintToken is MintableToken, UpgradeableToken, UpgradeAgent {
     string public constant  name="vidamint";
@@ -19,7 +19,7 @@ contract VidamintToken is MintableToken, UpgradeableToken, UpgradeAgent {
       //totalSupply = 2 * (10**18); // need to enable to test migration
       //balances[owner] = 2 * (10**18); // need to enable to test migration
     } 
-
+    
     function vidamintTokenMigration(UpgradeableToken _oldToken) {
 
         oldToken = _oldToken;

@@ -63,7 +63,7 @@ async function liveDeploy(deployer, network, accounts) {
     foundersConf = JSON.parse(fs.readFileSync('./conf/testFounders.json'));
     rewardeesConf = JSON.parse(fs.readFileSync('./conf/testTimelockTokens.json'));
     //saleConf.owner = owner;
-    fs.writeFileSync('./conf/testSale.json', JSON.stringify(saleConf, null, '  '));
+   // fs.writeFileSync('./conf/testSale.json', JSON.stringify(saleConf, null, '  '));
 
     let i = 10; // We use addresses from 0-3 for actors in the tests.
     for (founder in foundersConf.founders) {
@@ -101,13 +101,13 @@ async function liveDeploy(deployer, network, accounts) {
 
   const BigNumber = web3.BigNumber;
   const rate = saleConf.rate;
-  // const startTime = 1510609894611;//latestTime() + duration.minutes(1); const
-  // endTime =  1520609894611;//startTime + duration.weeks(1);
+   const startTime = 1510609894611;//latestTime() + duration.minutes(1); const
+   endTime =  1520609894611;//startTime + duration.weeks(1);
 
-  const startTime = latestTime() + duration.minutes(1);
-  const endTime = startTime + duration.weeks(1);
-  const cap = saleConf.cap;
-  const goal = saleConf.goal;
+  //const startTime = latestTime() + duration.minutes(1);
+  //const endTime = startTime + duration.weeks(1);
+  const cap = new BigNumber(saleConf.cap);
+  const goal = new BigNumber(saleConf.goal);
   const owner = saleConf.owner;
   const wallet = saleConf.wallet;
   console.log([
@@ -115,8 +115,8 @@ async function liveDeploy(deployer, network, accounts) {
     startTime,
     endTime,
     rate,
-    goal,
-    cap,
+    goal.toFixed(0),
+    cap.toFixed(0),
     wallet
   ]);
   // uint256 _startTime, uint256 _endTime, uint256 _rate, uint256, _cap, uint256
@@ -130,9 +130,9 @@ async function liveDeploy(deployer, network, accounts) {
     , rate
     , goal
     , cap
-    ,wallet,{gas: 4700000})
-    /* .then(() => vidamintSale.deployed())
-    .then((vidamintSale) => vidamintSale.distributeTimeLockRewards(rewardees,rewardeesTokens,vestingDates,{gas:4700000}))  */
+    ,wallet,{gas:4700000})
+   /*  .then(() => vidamintSale.deployed())
+    .then((vidamintSale) => vidamintSale.distributeTimeLockRewards(rewardees,rewardeesTokens,1530018000,7395))  */
     .then(() => vidamintSale.deployed())
     .then( async () => {
       const vidaInsta = await vidamintSale.deployed();

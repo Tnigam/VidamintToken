@@ -118,7 +118,7 @@ async function liveDeploy(deployer, network, accounts) {
     rate,
     goal.toFixed(0),
     cap.toFixed(0),
-    wallet
+    wallet,{gas:4700000}
   ]);
   // uint256 _startTime, uint256 _endTime, uint256 _rate, uint256, _cap, uint256
   // _goal, address _wallet)

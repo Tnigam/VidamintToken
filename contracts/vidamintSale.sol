@@ -10,10 +10,13 @@ import "zeppelin-solidity/contracts/math/SafeMath.sol";
 contract VidamintSale is CappedCrowdsale, Pausable {
     using SafeMath for uint256;
     bool public preSaleIsStopped = false;
+    bool public refundIsStopped = true;
     address[] public tokenVaults;
+    mapping (address => uint256) public deposited;
     event TransferredPreBuyersReward(address  preBuyer, uint amount);
     event TransferredlockedTokens (address vault, uint amount);
-
+    event Refunded(address indexed beneficiary, uint256 weiAmount);
+    
     function VidamintSale(
         address _owner,
         uint256 _startTime, 
@@ -30,7 +33,7 @@ contract VidamintSale is CappedCrowdsale, Pausable {
             //the value needs to less or equal than a cap which is limit for accepted funds
             require(_goal <= _cap);
             owner = _owner;
-            //pause();
+            pause();
     
         }
  
@@ -38,7 +41,10 @@ contract VidamintSale is CappedCrowdsale, Pausable {
         assert(preSaleIsStopped == false);
         _;
     }
-  
+  modifier refundIsRunning() {
+        assert(refundIsStopped == false);
+        _;
+    }
     function () whenNotPaused payable {
         buyTokens(msg.sender);
     }
@@ -61,7 +67,7 @@ contract VidamintSale is CappedCrowdsale, Pausable {
         
         assert(token.mint(beneficiary, tokens));
         TokenPurchase(msg.sender, beneficiary, weiAmount, tokens);
-
+        deposited[msg.sender] = deposited[msg.sender].add(msg.value);
         forwardFunds();
     }
 
@@ -93,7 +99,15 @@ contract VidamintSale is CappedCrowdsale, Pausable {
      /*
      * Owner-only functions
      */
-  
+   function refund() public refundIsRunning {
+       
+        uint256 depositedValue = deposited[msg.sender];
+        require(depositedValue > 0); 
+        deposited[msg.sender] = 0;
+        assert(deposited[msg.sender] == 0);
+        wallet.transfer(depositedValue);
+        Refunded(msg.sender, depositedValue);
+     }
      function getTokenVaultsCount() public constant returns(uint)
     {
         return tokenVaults.length;
@@ -131,6 +145,9 @@ contract VidamintSale is CappedCrowdsale, Pausable {
 
     function preSaleToggle() onlyOwner {
         preSaleIsStopped = !preSaleIsStopped;
+    }
+    function refundToggle() onlyOwner {
+        refundIsStopped = !refundIsStopped;
     }
 
     function createTokenContract()  internal returns (MintableToken) {

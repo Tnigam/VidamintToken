@@ -1,103 +1,108 @@
 {
-     "Genesis Block": {
-      "amount": "10742180",
+  "vestingDates": {
+    "first": "1530018000",
+    "second": "1545742800"
+  },
+  "rewardees":{
+    "Genesis Block": {
+      "amount": "5371090",
       "address": "0x2c85845F8deF610c29756C041dEF4C5F27db38a0"
     },
     "Ken Brook": {
-      "amount": "2500000",
+      "amount": "500000",
       "address": "0x1B1218Eb0D4C8a16f6B63EF0878EB02471BfCFDF"
     },
     "Assign Corp": {
-      "amount": "2565107",
+      "amount": "1074220",
       "address": "0x30268F4bba839bDAfB454160Ef67F89f35CF7C65"
     },
     "Radix": {
-      "amount": "859380",
+      "amount": "429690",
       "address": "0x9d2010a51C27A02d684D0547ae138A7bd0b9DdDB"
     },
     "Vishal Verma": {
-      "amount": "700000",
+      "amount": "19650000",
       "address": "0x4d0511a1537B03063e8465afe2E5b0D49712e622"
     },
     "Samir Damani": {
-      "amount": "700000",
+      "amount": "19650000",
       "address": "0xf095893Dca4F442504d7426149FD903b39A2128D"
     },
     "Patrick Daly": {
-      "amount": "200000",
+      "amount": "375000",
       "address": "0xb9Ee3a88D9bd603F34A46F6a103620350a960d07"
     },
     "Tee Green": {
-      "amount": "50000",
+      "amount": "475000",
       "address": "0x9DEB5F8d965a603ce55f1afe8b97088a2c622D07"
     },
     "Jeremy Sohn": {
-      "amount": "50000",
+      "amount": "75000",
       "address": "0xf94e9BdEA6AD3032aff7210D9604D6d254D8903F"
     },
+    "Simplexity - Tom Broadhead": {
+      "amount": "250000",
+      "address": "0x72506304788249C5025967849928c7a46a47DdCE"
+    },
     "Courtney Hooton": {
-      "amount": "50000",
+      "amount": "325000",
       "address": "0xdF42808c7014975c9281b2f1bA3b3c6da6d714E6"
     },
-    "Mark Jeffrey": {
-      "amount": "400000",
-      "address": "0x2a1dC05E75b14C4A84E8e78059F84eE229657c7e"
-    },
     "Consulting Services": {
-      "amount": "300000",
+      "amount": "375000",
       "address": "0x407CCfBbFBCdb0AA834739F2B52388Ea79dAf48b"
     },
     "Jean Balgrosky": {
-      "amount": "25000",
+      "amount": "237500",
       "address": "0x694Dd6CBf96bf008bd24BE6596FDAa5edBe69f29"
     },
     "Vincent Roth": {
-      "amount": "50000",
+      "amount": "75000",
       "address": "0xdB485728c52351F30701F19a71377A7F4bAfEeB8"
     },
     "Eric Daniels": {
-      "amount": "25000",
+      "amount": "37500",
       "address": "0x501AbAFAF5bf076635F3Cc51A5CF53A1f7ADb3D9"
     },
     "Gurkan Sahin": {
-      "amount": "25000",
+      "amount": "62500",
       "address": "0xB54eC43162284b4b52820cf9BF4ba9A71B92454b"
     },
     "Blake Cohen": {
-      "amount": "50000",
+      "amount": "100000",
       "address": "0x3a21B53d83aBD1018076f0A8c728960952aE0Bab"
     },
     "Grant Cermak": {
-      "amount": "25000",
+      "amount": "112500",
       "address": "0x19Fe1fE740b916c8b4a91bef47Cf3050702C9840"
     },
     "David Volick": {
-      "amount": "100000",
+      "amount": "200000",
       "address": "0x58DB41E8f9C55338F69B114B61E5C76bb030B899"
     },
     "Mike Klieger": {
-      "amount": "50000",
+      "amount": "225000",
       "address": "0xD598F1B9Ff2A386B295487c39b5b66B204950e8a"
     },
     "Chris Hafey": {
-      "amount": "25000",
+      "amount": "112500",
       "address": "0xEC8b4a4831F796eb1Ce28B2a5E2a768c3A5C926c"
     },
     "Wendy L. Lee": {
-      "amount": "100000",
+      "amount": "400000",
       "address": "0x343b935728d4321edEf1a0fA631B26119aa1E793"
     },
     "Larry Smarr": {
-      "amount": "25000",
+      "amount": "37500",
       "address": "0x78bE346c89dfF7f2c232Dc5703a96c865dD1D0a7"
     },
     "Arthur Roke": {
-      "amount": "25000",
+      "amount": "37500",
       "address": "0xF379872a594103989b0aAeBA3acc5D6753291eD5"
     },
     "Joe Kvedar": {
-      "amount": "50000",
+      "amount": "25000",
       "address": "0x111a7B04a02Cd9Db13Ebf6308765c2A0d1B410C1"
     }
-   
+  } 
 }

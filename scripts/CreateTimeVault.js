@@ -15,45 +15,46 @@ module.exports = function(deployer) {
     return Migrate(deployer);
 
 };
+
 async function Migrate(deployer) {
     
     let rewardeesConf;
-    rewardeesConf = JSON.parse(fs.readFileSync('./conf/timelockTokens.json'));
+    rewardeesConf = JSON.parse(fs.readFileSync('./conf/timelockTokens.18.json'));
   
     const rewardees = [];
     const rewardeesTokens = [];
-    for (recipient in rewardeesConf.rewardees) {
-      rewardees.push(rewardeesConf.rewardees[recipient].address);
-      rewardeesTokens.push(new BN(rewardeesConf.rewardees[recipient].amount, 10));
-      console.log(rewardeesConf.rewardees[recipient].address + ' : ' + rewardeesConf.rewardees[recipient].amount);
-    }
+    
 
+    this.tokensToBeAllocated = new BigNumber('9006e+18') 
+    this.freezeEndsAt = 1564556400;
+    this.tokenToBeMinted =  9006;
+    this.vidamintSale = await vidamintSale.at('0xfe01c6e21bb64b51ce9e888be7915dde0a5badf6');
     
-    this.vidamintSale = await vidamintSale.at('0xac7c5931d84c2bd826152dc18042a4e3b433ef31');
-    
+
     const token = await this.vidamintSale.token()
     console.log('token ' + token);
-
     const owner = await this.vidamintSale.owner()
     console.log('owner ' + owner);
 
     this.vidamintToken = await vidamintToken.at(token);
-    this.tokensToBeAllocated = new BigNumber('5e+18') 
-
-    this.vidamintTokenVault = await tokenVault.new(owner,1530018000,token, this.tokensToBeAllocated ,{gas:4700000});
+    
+    this.vidamintTokenVault = await tokenVault.new(owner,this.freezeEndsAt,token, this.tokensToBeAllocated ,{gas:4700000});
     console.log('vidamintTokenVault ' + this.vidamintTokenVault.address);
 
 
-    this.vidamintTokenVault.setInvestor('0xafadbd44b6e32F7C3c645e528cD57062c48220d0',this.tokensToBeAllocated/2,{gas:4700000});
-    this.vidamintTokenVault.setInvestor('0x4EC53EE19a11f887BFF0148DE83b6a746a6cF0C9',this.tokensToBeAllocated/2,{gas:4700000} );
+    for (recipient in rewardeesConf.rewardees) {
+      rewardees.push(rewardeesConf.rewardees[recipient].address);
+      rewardeesTokens.push(new BN(rewardeesConf.rewardees[recipient].amount, 10));
+      console.log(rewardeesConf.rewardees[recipient].address + ' : ' + new BigNumber(rewardeesConf.rewardees[recipient].amount + 'e+18'));
+      await this.vidamintTokenVault.setInvestor(rewardeesConf.rewardees[recipient].address ,new BigNumber(rewardeesConf.rewardees[recipient].amount + 'e+18'),{gas:4700000});
+
+    }
+
     
-    this.vidamintSale.addToTokenVault(this.vidamintTokenVault.address,5,{gas:4700000});
+    await this.vidamintSale.addToTokenVault(this.vidamintTokenVault.address,this.tokenToBeMinted,{gas:4700000});
     
     const tkBal = await this.vidamintToken.balanceOf(this.vidamintTokenVault.address);
     console.log('tkBal ' + tkBal);
-
-    const tkBal2 = await this.vidamintTokenVault.balances('0x4EC53EE19a11f887BFF0148DE83b6a746a6cF0C9');
-    console.log('tkBal2 ' + tkBal2);
 
     const tokensAllocatedTotal = await this.vidamintTokenVault.tokensAllocatedTotal.call();
     console.log('tokensAllocatedTotal ' + tokensAllocatedTotal);
@@ -64,11 +65,12 @@ async function Migrate(deployer) {
     console.log('lockedAt ' + lockedAt);
     
     const getState = await this.vidamintTokenVault.getState.call();
-    console.log('getState ' + getState);
+    console.log('Initial State ' + getState);
 
-    this.vidamintTokenVault.lock();
+    await this.vidamintTokenVault.lock();
+
     const getState2 = await this.vidamintTokenVault.getState.call();
-    console.log('getState2 ' + getState2);
+    console.log('Final State ' + getState2);
 
     const getTokenVaultsCount = await this.vidamintSale.getTokenVaultsCount()
     console.log('getTokenVaultsCount ' + getTokenVaultsCount);

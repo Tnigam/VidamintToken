@@ -82,7 +82,7 @@ contract TokenVault is Ownable {
 
     owner = _owner;
 
-    // Invalid owenr
+    // Invalid owner
     if(owner == 0) {
       revert();
     }
@@ -136,7 +136,7 @@ contract TokenVault is Ownable {
   ///      - All balances have been loaded in correctly
   ///      - Tokens are transferred on this vault correctly
   ///      - Checks are in place to prevent creating a vault that is locked with incorrect token balances.
-  function lock() public onlyOwner{
+  function lock() public onlyOwner {
 
     if(lockedAt > 0) {
       revert(); // Already locked

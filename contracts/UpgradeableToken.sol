@@ -66,7 +66,7 @@ contract UpgradeableToken is StandardToken {
         }
 
         // Validate input value.
-        if (value == 0) 
+        if (value == 0)
             revert();
 
         if (balances[msg.sender] >= value) {
@@ -84,7 +84,7 @@ contract UpgradeableToken is StandardToken {
     /**
     * Set an upgrade agent that handles
     */
-    function setUpgradeAgent(address agent) onlyMaster external {
+    function setUpgradeAgent(address agent) onlyMaster external { // fails vidaMigrate.js test
 
         if(!canUpgrade()) {
           // The token is not yet in a state that we could think upgrading
@@ -101,7 +101,7 @@ contract UpgradeableToken is StandardToken {
         // Bad interface
         if(!upgradeAgent.isUpgradeAgent()) revert();
       // Make sure that token supplies match in source and target
-        if (upgradeAgent.originalSupply() != totalSupply) revert(); 
+        if (upgradeAgent.originalSupply() != totalSupply) revert();
 
         UpgradeAgentSet(upgradeAgent);
     }

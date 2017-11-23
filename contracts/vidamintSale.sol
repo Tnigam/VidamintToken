@@ -16,14 +16,14 @@ contract VidamintSale is CappedCrowdsale, Pausable {
     event TransferredPreBuyersReward(address  preBuyer, uint amount);
     event TransferredlockedTokens (address vault, uint amount);
     event Refunded(address indexed beneficiary, uint256 weiAmount);
-    
+
     function VidamintSale(
         address _owner,
-        uint256 _startTime, 
-        uint256 _endTime, 
+        uint256 _startTime,
+        uint256 _endTime,
         uint256 _rate,
-        uint256 _goal, 
-        uint256 _cap, 
+        uint256 _goal,
+        uint256 _cap,
         address _wallet)
         CappedCrowdsale(_cap)
         //FinalizableCrowdsale()
@@ -34,9 +34,9 @@ contract VidamintSale is CappedCrowdsale, Pausable {
             require(_goal <= _cap);
             owner = _owner;
             pause();
-    
+
         }
- 
+
     modifier preSaleRunning() {
         assert(preSaleIsStopped == false);
         _;
@@ -58,13 +58,13 @@ contract VidamintSale is CappedCrowdsale, Pausable {
 
         // calculate token amount to be created
         uint256 tokens = weiAmount.mul(rate);
-    
+
         // update state
         weiRaised = weiRaised.add(weiAmount);
-        
+
         //tokens = tokens.mul(10**uint(18));
         require(tokens != 0);
-        
+
         assert(token.mint(beneficiary, tokens));
         TokenPurchase(msg.sender, beneficiary, weiAmount, tokens);
         deposited[msg.sender] = deposited[msg.sender].add(msg.value);
@@ -77,13 +77,13 @@ contract VidamintSale is CappedCrowdsale, Pausable {
     function distributePreBuyersRewards(
         address[] _preBuyers,
         uint[] _preBuyersTokens
-    ) public onlyOwner preSaleRunning { 
+    ) public onlyOwner preSaleRunning {
         for (uint i = 0; i < _preBuyers.length; i++) {
             uint tokenAmount = _preBuyersTokens[i].mul(10**uint(18));
             assert(token.mint(_preBuyers[i], tokenAmount));
             TransferredPreBuyersReward(_preBuyers[i], _preBuyersTokens[i]);
         }
-        
+
     }
     function addToTokenVault(
         address _tokenVault,
@@ -92,17 +92,17 @@ contract VidamintSale is CappedCrowdsale, Pausable {
 
         tokenVaults.push(_tokenVault);
         assert(token.mint(_tokenVault, _tokensToBeAllocated.mul(10**uint(18))));
-        
-    } 
+
+    }
 
 
      /*
      * Owner-only functions
      */
    function refund() public refundIsRunning {
-       
+
         uint256 depositedValue = deposited[msg.sender];
-        require(depositedValue > 0); 
+        require(depositedValue > 0);
         deposited[msg.sender] = 0;
         assert(deposited[msg.sender] == 0);
         wallet.transfer(depositedValue);

@@ -49,6 +49,7 @@ contract('CappedCrowdsale', function ([_, wallet]) {
 
     beforeEach(async function () {
       await increaseTimeTo(this.startTime)
+      await this.crowdsale.unpause()
     })
 
     it('should accept payments within cap', async function () {
@@ -71,6 +72,7 @@ contract('CappedCrowdsale', function ([_, wallet]) {
 
     beforeEach(async function () {
       await increaseTimeTo(this.startTime)
+      await this.crowdsale.unpause()
     })
 
     it('should not be ended if under cap', async function () {

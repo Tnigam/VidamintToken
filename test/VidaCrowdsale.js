@@ -16,6 +16,7 @@ const MintableToken = artifacts.require('MintableToken')
 
 contract('Crowdsale', function ([owner, investor, wallet, purchaser]) {
 
+
   const rate = new BigNumber(1)
   const value = ether(42)
   const goal = ether(100)
@@ -60,7 +61,7 @@ contract('Crowdsale', function ([owner, investor, wallet, purchaser]) {
 
     it('should accept payments after start', async function () {
       await increaseTimeTo(this.startTime)
-      //await this.crowdsale.unpause()
+      await this.crowdsale.unpause()
       await this.crowdsale.send(value).should.be.fulfilled
       await this.crowdsale.buyTokens(investor, {value: value, from: purchaser}).should.be.fulfilled
     })
@@ -77,6 +78,7 @@ contract('Crowdsale', function ([owner, investor, wallet, purchaser]) {
 
     beforeEach(async function() {
       await increaseTimeTo(this.startTime)
+      await this.crowdsale.unpause()
     })
 
     it('should log purchase', async function () {
@@ -116,6 +118,7 @@ contract('Crowdsale', function ([owner, investor, wallet, purchaser]) {
 
     beforeEach(async function() {
       await increaseTimeTo(this.startTime)
+      await this.crowdsale.unpause()
     })
 
     it('should log purchase', async function () {

@@ -9,7 +9,7 @@ contract VidamintToken is MintableToken, UpgradeableToken, UpgradeAgent {
     string public constant symbol = "VIDA";
     uint8 public constant decimals = 18;
     string public constant version="V1.0";
-  
+
     using SafeMath for uint256;
     UpgradeableToken public oldToken;
     uint256 public originalSupply;
@@ -18,8 +18,8 @@ contract VidamintToken is MintableToken, UpgradeableToken, UpgradeAgent {
       //owner = _owner;
       //totalSupply = 2 * (10**18); // need to enable to test migration
       //balances[owner] = 2 * (10**18); // need to enable to test migration
-    } 
-    
+    }
+
     function vidamintTokenMigration(UpgradeableToken _oldToken) {
 
         oldToken = _oldToken;
@@ -37,13 +37,13 @@ contract VidamintToken is MintableToken, UpgradeableToken, UpgradeAgent {
     }
 
     function upgradeFrom(address _from, uint256 _value) public {
-        if (msg.sender != address(oldToken)) 
+        if (msg.sender != address(oldToken))
             revert(); // only upgrade from oldToken
 
         // Mint new tokens to the migrator
         totalSupply = totalSupply.add(_value);
         balances[_from] = balances[_from].add(_value);
-            
+
         Transfer(0, _from, _value);
     }
 }

@@ -3,7 +3,6 @@ import "./vidamintToken.sol";
 import "zeppelin-solidity/contracts/lifecycle/Pausable.sol";
 import "zeppelin-solidity/contracts/token/MintableToken.sol";
 import "zeppelin-solidity/contracts/crowdsale/CappedCrowdsale.sol";
-//import "zeppelin-solidity/contracts/crowdsale/RefundableCrowdsale.sol";
 import "zeppelin-solidity/contracts/math/SafeMath.sol";
 
 
@@ -22,16 +21,10 @@ contract VidamintSale is CappedCrowdsale, Pausable {
         uint256 _startTime,
         uint256 _endTime,
         uint256 _rate,
-        uint256 _goal,
-        uint256 _cap,
+        uint256 _cap, 
         address _wallet)
         CappedCrowdsale(_cap)
-        //FinalizableCrowdsale()
-        //RefundableCrowdsale(_goal)
         Crowdsale(_startTime, _endTime, _rate, _wallet) {
-            //As goal needs to be met for a successful crowdsale
-            //the value needs to less or equal than a cap which is limit for accepted funds
-            require(_goal <= _cap);
             owner = _owner;
             pause();
 
@@ -127,7 +120,10 @@ contract VidamintSale is CappedCrowdsale, Pausable {
         require(_newRate != 0);
         rate = _newRate;
     }
-
+    function changeCap(uint256 _newCap) onlyOwner {
+        require(_newCap != 0);
+        cap = _newCap;
+    }
     function changeWallet(address _wallet) onlyOwner {
         require(_wallet != 0);
         wallet = _wallet;

@@ -1,0 +1,16 @@
+{
+    "vestingDates": {
+      "first": "1530018000",
+      "second": "1545742800"
+    },
+    "rewardees":{
+      "Genesis Block": {
+        "amount": "9000",
+        "address": "0x2c85845F8deF610c29756C041dEF4C5F27db38a0"
+      },
+      "Ken Brook": {
+        "amount": "6",
+        "address": "0x1B1218Eb0D4C8a16f6B63EF0878EB02471BfCFDF"
+      }
+    }
+  }

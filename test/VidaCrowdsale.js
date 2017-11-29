@@ -33,7 +33,7 @@ contract('Crowdsale', function ([owner, investor, wallet, purchaser]) {
     this.afterEndTime = this.endTime + duration.seconds(1)
     //this.owner ='0xdf08f82de32b8d460adbe8d72043e3a7e25a3b39';
 
-    this.crowdsale = await Crowdsale.new(owner,this.startTime, this.endTime, rate, goal,cap,wallet)
+    this.crowdsale = await Crowdsale.new(owner,this.startTime, this.endTime, rate,cap,wallet)
 
     this.token = MintableToken.at(await this.crowdsale.token())
   })
@@ -60,7 +60,7 @@ contract('Crowdsale', function ([owner, investor, wallet, purchaser]) {
 
     it('should accept payments after start', async function () {
       await increaseTimeTo(this.startTime)
-      //await this.crowdsale.unpause()
+      await this.crowdsale.unpause()
       await this.crowdsale.send(value).should.be.fulfilled
       await this.crowdsale.buyTokens(investor, {value: value, from: purchaser}).should.be.fulfilled
     })
@@ -77,6 +77,7 @@ contract('Crowdsale', function ([owner, investor, wallet, purchaser]) {
 
     beforeEach(async function() {
       await increaseTimeTo(this.startTime)
+      await this.crowdsale.unpause()
     })
 
     it('should log purchase', async function () {
@@ -116,6 +117,7 @@ contract('Crowdsale', function ([owner, investor, wallet, purchaser]) {
 
     beforeEach(async function() {
       await increaseTimeTo(this.startTime)
+      await this.crowdsale.unpause()
     })
 
     it('should log purchase', async function () {

@@ -18,17 +18,21 @@ module.exports = function(deployer) {
 
 async function Migrate(deployer) {
     
+    const tokenSaleAddr = '0x52efde13ceab2b057878ecd9634e9b463b6445d8'
+    const tokensAllocatedString = '9006e+18'
+
+
     let rewardeesConf;
-    rewardeesConf = JSON.parse(fs.readFileSync('./conf/timelockTokens.18.json'));
+    rewardeesConf = JSON.parse(fs.readFileSync('./conf/timelockTokens.19.json'));
   
     const rewardees = [];
     const rewardeesTokens = [];
     
 
-    this.tokensToBeAllocated = new BigNumber('9006e+18') 
+    this.tokensToBeAllocated = new BigNumber(tokensAllocatedString) 
     this.freezeEndsAt = 1564556400;
     this.tokenToBeMinted =  9006;
-    this.vidamintSale = await vidamintSale.at('0xfe01c6e21bb64b51ce9e888be7915dde0a5badf6');
+    this.vidamintSale = await vidamintSale.at(tokenSaleAddr);
     
 
     const token = await this.vidamintSale.token()

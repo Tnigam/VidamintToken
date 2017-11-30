@@ -17,7 +17,7 @@ module.exports = function(deployer) {
 };
 async function Migrate(deployer) {
        
-    this.vidamintSale = await vidamintSale.at('0x598010a0131b04416c68799c5e0aaf636403b647');
+    this.vidamintSale = await vidamintSale.at('0xa7df1d30f6456dc72ce18fe011896105651a1f86');
     
     
     

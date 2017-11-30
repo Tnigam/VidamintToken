@@ -1,4 +1,5 @@
 const vidamintSale = artifacts.require("./vidamintSale.sol");
+const vidaToken = artifacts.require("./vidamintToken.sol")
 
 const fs = require('fs');
 const BN = require('bn.js');
@@ -69,15 +70,23 @@ async function liveDeploy(deployer, network, accounts) {
     wallet
   ]);
 
-  deployer.deploy(vidamintSale, owner, startTime, endTime, rate, cap, wallet, {gas:7829561})
-    // .then(() => vidamintSale.deployed())
+  deployer.deploy(vidamintSale, owner, startTime, endTime, rate, cap, wallet, {gas:7829561}) //increased only for local development
+    .then(() => vidamintSale.deployed())
     .then( async function() {
       const vidaInsta = await vidamintSale.deployed();
       const token = await vidaInsta.token.call();
       console.log('Token Address 1', token);
     });
 
-  //here for testing purposes only
+
+
+  // // here for testing purposes only
+  // deployer.deploy(vidaToken, {gas: 4700000})
+  //   .then( async function (instance) {
+  //     const token2 = await vidaToken.deployed();
+  //     console.log(`Token Address 2 ${token2.address}`)
+  //   })
+
   // deployer.deploy(vidamintSale, owner, startTime, endTime, rate, cap.times(2), wallet, {gas:7829561})
   //   // .then(() => vidamintSale.deployed())
   //   .then( async function() {
@@ -85,6 +94,8 @@ async function liveDeploy(deployer, network, accounts) {
   //     const token = await vidaInsta.token.call();
   //     console.log('Token Address 2', token);
   //   });
+
+
 
   }
 

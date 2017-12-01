@@ -8,7 +8,7 @@ const BigNumber = web3.BigNumber
  const should = require('chai')
   .use(require('chai-as-promised'))
   .use(require('chai-bignumber')(BigNumber))
-  .should() 
+  .should()
 
 module.exports = function(deployer) {
 
@@ -16,26 +16,26 @@ module.exports = function(deployer) {
 
 };
 async function Migrate(deployer) {
-       
-    this.vidamintSale = await vidamintSale.at('0xa7df1d30f6456dc72ce18fe011896105651a1f86');
-    
-    
-    
+
+    this.vidamintSale = await vidamintSale.at('0x8fd73071ae9e224cfe711a7186e19d1f02feded5');
+
+
+
     const startTime = await this.vidamintSale.startTime.call();
     console.log('Sale Start Time ' + startTime);
-    
+
     const endTime = await this.vidamintSale.endTime.call();
     console.log('Sale End Time ' + endTime);
-    
+
     const rate = await this.vidamintSale.rate.call();
     console.log('Sale Initial rate ' + rate);
-    
+
     const cap = await this.vidamintSale.cap.call();
     console.log('Sale cap ' + cap.toFixed(0));
-    
+
     const wallet = await this.vidamintSale.wallet.call();
     console.log('Sale wallet ' + wallet);
-    
+
     const owner = await this.vidamintSale.owner.call();
     console.log('Sale owner ' + owner);
 

@@ -20,13 +20,15 @@ module.exports = function(deployer) {
 };
 async function Migrate(deployer) {
 
-    const tokenSaleAddr = '0x52efde13ceab2b057878ecd9634e9b463b6445d8'
-    const token1Addr = '0x7a603de51679539c15aa4cc2cc37c33d0b2ca4eb'
-    const token2Addr = '0x4f13c9d75803abdeee6416208df2030d800c9876'
+    const tokenSaleAddr = '0xa11260b588429fcace882ffcda323531ad320271'
+    const token1Addr = '0xcedfc848311231f2491a2c49e1ae1b520b4ffccc'
+    const token2Addr = '0x6a787a47a02dd664e99f5b72257f88e0d2632ee6'
     const accountOwner = '0xdf08f82de32b8d460adbe8d72043e3a7e25a3b39' // this is who owns all the contracts
     const tokensAllocatedString = '9006e+18'
     const Gas = new BigNumber(4700000);
+    const weiToEth = 1000000000000000000
 
+    this.vidamintSale = vidamintSale.at(tokenSaleAddr)
     this.vidamintToken = vidamintToken.at(token1Addr);
     this.newVidamintToken = vidamintToken.at(token2Addr);
 
@@ -35,8 +37,9 @@ async function Migrate(deployer) {
 
     const tkBal = await this.vidamintToken.balanceOf.call(owner);
     console.log('vidamintToken: tkBal ' + tkBal);
+
     this.tkSupply = await this.vidamintToken.totalSupply.call();
-    console.log('vidamintToken: tkSupply ' + this.tkSupply.toFixed(0));
+    console.log('vidamintToken: tkSupply(1) ' + this.tkSupply.dividedBy(weiToEth));
 
     this.upgradeMaster = await this.vidamintToken.upgradeMaster.call();
     console.log('vidamintToken: upgradeMaster ' + this.upgradeMaster);
@@ -55,20 +58,21 @@ async function Migrate(deployer) {
     console.log(`vidamintToken: Can this token be an upgradeAgent = ${isUpgradeAgent}`)
 
     const agentOriginalSupply = await newUpgradeAgent.originalSupply.call()
-    console.log(`vidamintToken: agent original suppply = ${agentOriginalSupply}`)
+    console.log(`vidamintToken: agent original suppply = ${agentOriginalSupply.dividedBy(weiToEth)}`)
 
     const newTokenTotalSupply = await this.newVidamintToken.totalSupply.call()
-    console.log(`newVidamintToken: newToken totalSupply = ${newTokenTotalSupply}`)
+    console.log(`newVidamintToken: newToken totalSupply = ${newTokenTotalSupply.dividedBy(weiToEth)}`)
 
     this.totalUpgraded = await this.vidamintToken.totalUpgraded.call();
-    console.log('vidamintToken: totalUpgraded ' + this.totalUpgraded.toFixed(0));
+    console.log('vidamintToken: totalUpgraded ' + this.totalUpgraded.dividedBy(weiToEth));
 
 
 
     console.log('NOTE: About to do set migration from token 1 to token 2')
     this.newVidamintTokenMigration = await this.newVidamintToken.vidamintTokenMigration(this.vidamintToken.address,{gas: Gas});
-    const newtkSupply = await this.newVidamintToken.originalSupply();
-    console.log('newVidamintToken: newtkSupply ' + newtkSupply.toFixed(0));
+
+    const originalSupply = await this.newVidamintToken.originalSupply();
+    console.log('newVidamintToken: originalSupply ' + originalSupply.dividedBy(weiToEth));
 
 
     this.getUpgradeState = await this.newVidamintToken.getUpgradeState.call();
@@ -77,16 +81,15 @@ async function Migrate(deployer) {
 
     console.log(`NOTE: About to change Master on the vidamintSale contract to address owner: ${accountOwner}`)
   //   // // // await this.vidamintToken.setUpgradeMaster('0x37D93cc2A7629866cAd88a5BbCf939767f9B9B94',{gas: Gas}); // fails
-    this.vidamintSale = vidamintSale.at(tokenSaleAddr)
     await this.vidamintSale.changeTokenUpgradeMaster(accountOwner, {gas: Gas}) // works
     this.upgradeMaster = await this.vidamintToken.upgradeMaster.call();
     console.log('vidamintToken: upgradeMaster ' + this.upgradeMaster);
 
 
-   console.log('newVidamintToken: address ' + this.newVidamintToken.address);
+    console.log('newVidamintToken: address ' + this.newVidamintToken.address);
 
-   console.log(`NOTE: About to set the upgrade agent in token 1`)
-    await this.vidamintToken.setUpgradeAgent(this.newVidamintToken.address,{gas: Gas});
+    console.log(`NOTE: About to set the upgrade agent in token 1`)
+    await this.vidamintToken.setUpgradeAgent(this.newVidamintToken.address, {gas: Gas});
     this.upgradeAgent = await this.vidamintToken.upgradeAgent.call();
     console.log('vidamintToken: upgradeAgent ' + this.upgradeAgent);
 
@@ -98,15 +101,17 @@ async function Migrate(deployer) {
     await this.vidamintToken.upgrade(new BigNumber(tokensAllocatedString) ,{gas:Gas});
 
 
-     const tkBal1 = await this.vidamintToken.balanceOf.call(accountOwner);
+    const tkBal1 = await this.vidamintToken.balanceOf.call(accountOwner);
     console.log('vidamintToken: tkBal1 ' + tkBal1);
+
     const tkSupply1 = await this.vidamintToken.totalSupply.call();
-    console.log('vidamintToken: tkSupply1 ' + tkSupply1.toFixed(0));
+    console.log('vidamintToken: tkSupply(1) ' + tkSupply1.dividedBy(weiToEth));
 
     const tkBal2 = await this.newVidamintToken.balanceOf.call(accountOwner);
     console.log('newVidamintToken: tkBal2 ' + tkBal2);
+
     this.tkSupply2 = await this.newVidamintToken.totalSupply.call();
-    console.log('newVidamintToken: tkSupply2 ' + this.tkSupply2.toFixed(0));
+    console.log('newVidamintToken: tkSupply(3) ' + this.tkSupply2.dividedBy(weiToEth));
 
     console.log('Migration done: from ' + this.vidamintToken.address + ' to ' + this.newVidamintToken.address);
 }

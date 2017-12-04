@@ -71,7 +71,7 @@ async function liveDeploy(deployer, network, accounts) {
   ]);
 
   deployer.deploy(vidamintSale, owner, startTime, endTime, rate, cap, wallet, {gas:7829561}) //increased only for local development
-    .then(() => vidamintSale.deployed())
+    // .then(() => vidamintSale.deployed())
     .then( async function() {
       const vidaInsta = await vidamintSale.deployed();
       const token = await vidaInsta.token.call();

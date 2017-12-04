@@ -1,6 +1,7 @@
 const vidamintToken = artifacts.require("./vidamintToken.sol");
 const tokenVault = artifacts.require("./TokenVault.sol");
 const vidamintSale = artifacts.require("./vidamintSale.sol");
+const determinTokensToMint = require('./helpers/determinTokensToMint')
 const fs = require('fs');
 const BN = require('bn.js');
 const BigNumber = web3.BigNumber
@@ -16,17 +17,9 @@ module.exports = function(deployer) {
 
 };
 
-function determinTokensToMint(conf) {
-  let totalTokens = 0
-  for (recipient in conf.rewardees) {
-    totalTokens = totalTokens + parseInt(conf.rewardees[recipient].amount, 10)
-  }
-  return totalTokens
-}
-
 async function Migrate(deployer) {
 
-    const tokenSaleAddr = '0x162a36c9821eadecff9669a3940b7f72d055cd1c'
+    const tokenSaleAddr = '0xa11260b588429fcace882ffcda323531ad320271'
     const rewardeesConf = JSON.parse(fs.readFileSync('./conf/timelockTokens.19.json'));
 
     const weiToEth = 1000000000000000000
@@ -48,14 +41,14 @@ async function Migrate(deployer) {
     this.vidamintTokenVault = await tokenVault.new(owner,this.freezeEndsAt, token, this.tokensToBeAllocated, {gas:4700000});
     console.log('vidamintTokenVault: ' + this.vidamintTokenVault.address);
 
-    console.log(`------------ List of rewardees ------------`)
+    console.log(`\n------------ List of rewardees ------------`)
     for (recipient in rewardeesConf.rewardees) {
       let address = rewardeesConf.rewardees[recipient].address
       let amount = new BigNumber(rewardeesConf.rewardees[recipient].amount + 'e+18') // converting to wei
       console.log(`${recipient} (${address}) gets ${amount.dividedBy(weiToEth)} tokens`);
       await this.vidamintTokenVault.setInvestor(address, amount, {gas:4700000});
     }
-    console.log(`------------ List of rewardees ------------`)
+    console.log(`------------ List of rewardees ------------\n`)
 
     await this.vidamintSale.addToTokenVault(this.vidamintTokenVault.address,this.tokenToBeMinted,{gas:4700000});
 
@@ -91,14 +84,17 @@ async function Migrate(deployer) {
     const getTokenVaultsCount = await this.vidamintSale.getTokenVaultsCount.call()
     console.log('vidamintSale: getTokenVaultsCount ' + getTokenVaultsCount);
 
-    console.log(`------------ List of rewardees RESULT ------------`)
+    console.log(`\n------------ List of rewardees RESULT ------------`)
     for (recipient in rewardeesConf.rewardees) {
       let address = rewardeesConf.rewardees[recipient].address
       let balance = await this.vidamintTokenVault.balances.call(address);
       console.log(`${recipient} (${address}) gets ${balance.dividedBy(weiToEth)} tokens`);
     }
-    console.log(`------------ List of rewardees RESULT ------------`)
+    console.log(`------------ List of rewardees RESULT ------------\n`)
+
+    const totalSupply2 = await this.vidamintToken.totalSupply.call();
+    console.log('Token Total Supply (2) ' + totalSupply2.dividedBy(weiToEth));
 
     const tokenVaults = await this.vidamintSale.tokenVaults.call(getTokenVaultsCount-1);
-    console.log('vidamintSale: tokenVaults ' + tokenVaults);
+    console.log('\nvidamintSale: tokenVaults ' + tokenVaults);
   }

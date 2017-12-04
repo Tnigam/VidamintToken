@@ -17,9 +17,9 @@ module.exports = function(deployer) {
 };
 async function Migrate(deployer) {
 
-    this.vidamintSale = await vidamintSale.at('0x8fd73071ae9e224cfe711a7186e19d1f02feded5');
+    this.vidamintSale = await vidamintSale.at('0xa11260b588429fcace882ffcda323531ad320271');
 
-
+    const weiToEth = 1000000000000000000
 
     const startTime = await this.vidamintSale.startTime.call();
     console.log('Sale Start Time ' + startTime);
@@ -53,8 +53,17 @@ async function Migrate(deployer) {
     this.vidamintToken = vidamintToken.at(this.token);
 
     const totalSupply = await this.vidamintToken.totalSupply.call();
-    console.log('Token Total Supply ' + totalSupply.toFixed(0));
+    console.log('vidamintToken: Token Supply ' + totalSupply.dividedBy(weiToEth));
+
+    this.totalUpgraded = await this.vidamintToken.totalUpgraded.call();
+    console.log('vidamintToken: totalUpgraded ' + this.totalUpgraded.dividedBy(weiToEth));
+
+    const remainingToBeUpgraded = totalSupply.minus(this.totalUpgraded)
+    console.log(`Reamining to be updated: ${remainingToBeUpgraded.dividedBy(weiToEth)}`)
 
     const weiRaised = await this.vidamintSale.weiRaised.call();
     console.log('Total Wei Raised ' + weiRaised);
+
+    const upgradeState = await this.vidamintToken.getUpgradeState.call();
+    console.log('vidamintToken: upgradeState ' + upgradeState);
   }

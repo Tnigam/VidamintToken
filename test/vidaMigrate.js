@@ -59,18 +59,18 @@ contract('Crowdsale', function ([deployOwner, investor, wallet, purchaser]) {
     //debugger variables
     // const tkBal = await this.token1.balanceOf(owner);
     // console.log('tkBal ' + tkBal);
-    
+
     //allocate some tokens so there is something to upgrade
     this.tokenVault = await tokenVault.new(deployOwner, this.freezeEndsAt, token1, this.tokensToBeAllocated ,{gas:4700000});
     console.log('this.tokenVault ' + this.tokenVault.address);
-    
+
     await this.tokenVault.setInvestor('0x2c85845F8deF610c29756C041dEF4C5F27db38a0', new BigNumber('9006e+18'), {gas:4700000});
     await this.crowdsale.addToTokenVault(this.tokenVault.address, this.tokenToBeMinted, {gas:4700000});
     await this.tokenVault.lock(); // not neccessary
 
     this.tkSupply = await this.token1.totalSupply();
     console.log('tkSupply ' + this.tkSupply);
-    
+
     // const canUpgrade = await this.token1.canUpgrade();
     // console.log('canUpgrade ' + canUpgrade);
     //
@@ -109,43 +109,25 @@ contract('Crowdsale', function ([deployOwner, investor, wallet, purchaser]) {
     this.tkSupply2 = await this.token2.totalSupply();
     console.log('tkSupply2 ' + this.tkSupply2);
     console.log('done')
-
-    //old console logs
-    // const upgradeAgent_tmp = await this.token1.upgradeAgent.call()
-    // console.log(`upgradeAgent_tmp = ${upgradeAgent_tmp}`)
-    // console.log(`new vidamint migration address  = ${this.token2.address}`)
-
-    //enable once the above works.
-    // await this.token1.setUpgradeMaster(wallet, {from:deployOwner});
-    // await this.token1.setUpgradeAgent(this.token2.address, {from:wallet});
-    // const upgradeAgent_tmp2 = await this.token1.upgradeAgent.call()
-    // console.log(`upgradeAgent_tmp2 = ${upgradeAgent_tmp2}`)
-
-    // this.getUpgradeState = await this.token1.getUpgradeState.call();
-    // console.log('token1: getUpgradeState ' + this.getUpgradeState);
-
-    // await this.token1.upgrade(this.tkSupply, { from: deployOwner });
-    // console.log('done')
-    // const tkBal1 = await this.token1.balanceOf(deployOwner);
-    // console.log('tkBal1 ' + tkBal1);
-    // const tkSupply1 = await this.token1.totalSupply();
-    // console.log('tkSupply1 ' + tkSupply1);
-    
-    // const tkBal2 = await this.token2.balanceOf(deployOwner);
-    // console.log('tkBal2 ' + tkBal2);
-    // this.tkSupply2 = await this.token2.totalSupply();
-    // console.log('tkSupply2 ' + this.tkSupply2);
-
   })
 
-    it('supply should be transferred', async function () {
-      // const master_tmp = await this.token1.upgradeMaster.call()
-      // await this.token1.setUpgradeAgent(this.vidamintTokenMigration.address, {from: master_tmp});
-      // const upgradeAgent_tmp = await this.token1.upgradeAgent.call()
-      // console.log(`upgradeAgent_tmp = ${upgradeAgent_tmp}`)
-
-      // throw new Error('myerror')
-       // this.tkSupply2.should.be.bignumber.equal(this.tkSupply)
+    it('Token2 supply should be Token1 original supply', async function () {
+       const tkSupply2 = await this.token2.totalSupply();
+       tkSupply2.should.be.bignumber.equal(this.tkSupply)
     })
 
+    it('Token1 balance should be zero', async function() {
+      const tkBal1 = await this.token1.balanceOf(deployOwner);
+      tkBal1.should.be.bignumber.equal(0)
+    })
+
+    it('deployOwner Token1 balance should be zero ', async function() {
+      const balance = await this.token1.balanceOf(deployOwner);
+      balance.should.be.bignumber.equal(0)
+    })
+
+    it('deployOwner Token2 balance should be 9.006e+21', async function() {
+      const balance = await this.token2.balanceOf(deployOwner);
+      balance.should.be.bignumber.equal('9.006e+21')
+    })
 })

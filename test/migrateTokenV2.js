@@ -264,20 +264,20 @@ contract('Migration V2:', function ([deployOwner, investor, wallet, purchaser]) 
       upgradeState.should.be.bignumber.equal(3)
 
       let balance = await this.token1.balanceOf.call(purchaser)
-      console.log('deployOwner Token1 Balance: before: ' + balance);
+      console.log('purchaser Token1 Balance: before: ' + balance);
 
       balance = await this.token2.balanceOf.call(purchaser)
-      console.log('deployOwner Token2 Balance: before: ' + balance);
+      console.log('purchaser Token2 Balance: before: ' + balance);
 
       this.tkSupply = await this.token1.totalSupply.call()
       console.log('this.tksupply ' + this.tkSupply)
       await this.token1.upgrade(this.tkSupply, { from: purchaser }).should.not.be.rejected
 
       balance = await this.token1.balanceOf.call(purchaser)
-      console.log('deployOwner Token1 Balance: after: ' + balance);
+      console.log('purchaser Token1 Balance: after: ' + balance);
 
       balance = await this.token2.balanceOf.call(purchaser)
-      console.log('deployOwner Token2 Balance: after: ' + balance);
+      console.log('purchaser Token2 Balance: after: ' + balance);
 
       upgradeState = await this.token1.getUpgradeState.call()
       upgradeState.should.be.bignumber.equal(4)

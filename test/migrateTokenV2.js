@@ -25,7 +25,7 @@ contract('Migration V2:', function ([deployOwner, investor, wallet, purchaser]) 
      await advanceBlock()
   })
 
-  describe('No Tokens Allocated: ', () => {
+  describe('Token Migrations: ', () => {
     beforeEach(async function () {
 
       // this.options = {
@@ -278,6 +278,7 @@ contract('Migration V2:', function ([deployOwner, investor, wallet, purchaser]) 
 
       balance = await this.token2.balanceOf.call(purchaser)
       console.log('purchaser Token2 Balance: after: ' + balance);
+      balance.should.be.bignumber.equal(0)
 
       upgradeState = await this.token1.getUpgradeState.call()
       upgradeState.should.be.bignumber.equal(4)

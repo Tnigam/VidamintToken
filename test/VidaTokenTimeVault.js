@@ -28,6 +28,13 @@ contract('TokenVault:', function ([owner, investor, wallet, purchaser, randomUse
      await advanceBlock()
   })
 
+  describe('TokenVault Constructor:', () => {
+    it('should successfully create token vault')
+    it('should fail to create tokenVault if owner is set to zero')
+    it('should fail to create tokenVault if token address is not a standard token')
+    it('should fail to create tokenVault if freezeEndAt is not set')
+  }) //end of TokenVault Constructor
+
   describe('Claiming tokens:', () => {
     beforeEach(async function () {
       this.startTime = latestTime() + duration.seconds(1)
@@ -66,16 +73,18 @@ contract('TokenVault:', function ([owner, investor, wallet, purchaser, randomUse
       // console.log('getState2 ' + getState2)
     })
 
-    it('cannot be released before time limit', async function () {
+    it('should fail to cliam because vault has been locked')
+
+    it('should fail to claim funds before freezeEnd time', async function () { // TODO: Augment test
       await this.vidamintTokenVault.claim({from: investor}).should.be.rejected
     })
 
-    it('cannot be released just before time limit', async function () {
+    it('should fail to claim funds just before freezeEnd time', async function () { // TODO: Augment test
       await increaseTimeTo(this.releaseTime - duration.seconds(3))
       await this.vidamintTokenVault.claim({from: investor}).should.be.rejected
     })
 
-    it('cannot be claimed by randomUser', async function () {
+    it('should fail claim funds for a randomUser not in balances', async function () {
       await increaseTimeTo(this.releaseTime + duration.seconds(19))
 
       let randomUserBalanceBefore = await this.token.balanceOf.call(randomUser)
@@ -87,7 +96,7 @@ contract('TokenVault:', function ([owner, investor, wallet, purchaser, randomUse
       randomUserBalanceAfter.should.be.bignumber.equal(0)
     })
 
-    it('can be released just after limit', async function () {
+    it('should succesfully allow user to claim funds after freezeEndAt time', async function () {
       await increaseTimeTo(this.releaseTime + duration.seconds(19))
 
       const balanceBefore = await this.vidamintTokenVault.balances.call(investor)
@@ -111,12 +120,7 @@ contract('TokenVault:', function ([owner, investor, wallet, purchaser, randomUse
       investorBalanceAfter.should.be.bignumber.equal('1000000000000000000')
     })
 
-    it('can be released after time limit', async function () {
-      await increaseTimeTo(this.releaseTime + duration.years(1))
-      await this.vidamintTokenVault.claim({from: investor}).should.be.fulfilled
-    })
-
-    it('cannot be released twice', async function () {
+    it('should fail to allow investor to claim funds twice', async function () { // TODO: Augment test
       await increaseTimeTo(this.releaseTime + duration.years(1))
       await this.vidamintTokenVault.claim({from: investor}).should.be.fulfilled
       await this.vidamintTokenVault.claim({from: investor}).should.be.rejected
@@ -277,5 +281,23 @@ contract('TokenVault:', function ([owner, investor, wallet, purchaser, randomUse
       state.should.be.bignumber.equal(1)
     })
   }) // end of testing locking functionality
+
+  describe.skip('recoverFailedLock:', () => {
+    beforeEach(async function () {
+      this.startTime = latestTime() + duration.seconds(1);
+      this.endTime =   this.startTime + duration.weeks(1);
+      this.afterEndTime = this.endTime + duration.seconds(1)
+
+      this.crowdsale = await Crowdsale.new(owner, this.startTime, this.endTime, rate, cap, wallet)
+      await this.crowdsale.unpause()
+      this.token = MintableToken.at(await this.crowdsale.token())
+
+      this.releaseTime = latestTime() + duration.years(1)
+      this.vidamintTokenVault = await TokenVault.new(owner,this.releaseTime,this.token.address, amount, {from: owner})
+    })
+
+    it('should fail to recover funds because vault is locked (lockedAt > 0)')
+    it('should successfully recover funds from lock')
+  }) //end of recoverFailedLock
 
 })

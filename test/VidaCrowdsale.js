@@ -51,6 +51,16 @@ contract('Crowdsale', function ([owner, investor, wallet, purchaser, randomUser,
     ended.should.equal(true)
   })
 
+  describe('CrowdSale Constructor:', () => {
+    it('should successfully create crowdsale contract')
+    it('should fail if owner = 0x0')
+    it('should fail if startTime <= now')
+    it('should fail if endTime < startTime')
+    it('should fail if rate <=0')
+    it('should fail if wallet == 0x0')
+    it('should fail if cap <= 0')
+  }) //end of name
+
   describe('changeTokenUpgradeMaster:', () => {
     it('should successfully allow owner to change of master of token contract', async function () {
       let originalMaster = await this.token.upgradeMaster.call()
@@ -66,6 +76,7 @@ contract('Crowdsale', function ([owner, investor, wallet, purchaser, randomUser,
       newMaster.should.not.equal(purchaser)
       newMaster.should.equal(originalMaster)
     })
+    it('should fail to changeUpgradeMaster to 0x0')
   })
 
   describe('changeOwner:', () => {
@@ -83,6 +94,7 @@ contract('Crowdsale', function ([owner, investor, wallet, purchaser, randomUser,
       newOwner.should.not.equal(purchaser)
       newOwner.should.equal(originalOwner)
     })
+    it('should fail to allow owner to be 0x0')
   })
 
   describe('changeRate:', () => {
@@ -102,6 +114,7 @@ contract('Crowdsale', function ([owner, investor, wallet, purchaser, randomUser,
       newRate.should.be.bignumber.not.equal(localRate)
       newRate.should.bignumber.equal(originalRate)
     })
+    it('should fail to change rate to 0')
   }) //end of changeRate
 
   describe('changeCap:', () => {
@@ -121,6 +134,7 @@ contract('Crowdsale', function ([owner, investor, wallet, purchaser, randomUser,
       newCap.should.be.bignumber.not.equal(localCap)
       newCap.should.bignumber.equal(originalCap)
     })
+    it('should fail to set new cap to 0')
   }) //end of changeCap
 
   describe('changeWallet:', () => {
@@ -138,6 +152,7 @@ contract('Crowdsale', function ([owner, investor, wallet, purchaser, randomUser,
       newWallet.should.be.bignumber.not.equal(wallet2)
       newWallet.should.be.bignumber.equal(originalWallet)
     })
+    it('should fail to set wallet to 0x0')
   }) //end of changeWallet
 
   describe('changeStartTime:', () => {
@@ -157,6 +172,7 @@ contract('Crowdsale', function ([owner, investor, wallet, purchaser, randomUser,
       newStartTime.should.be.bignumber.not.equal(time)
       newStartTime.should.be.bignumber.equal(originalStartTime)
     })
+    it('should fail to set startTime to 0')
   }) //end of name
 
   describe('changeEndTime:', () => {
@@ -176,6 +192,7 @@ contract('Crowdsale', function ([owner, investor, wallet, purchaser, randomUser,
       newEndTime.should.be.bignumber.not.equal(time)
       newEndTime.should.be.bignumber.equal(originalEndTime)
     })
+    it('should fail to set endTime to 0')
   }) //end of changeEndTime
 
   describe('preSaleToggle:', () => {
@@ -230,34 +247,6 @@ contract('Crowdsale', function ([owner, investor, wallet, purchaser, randomUser,
     it('should successfully refund user')
     it('should fail to refund because refunding is disabled')
   }) //end of refund
-
-
-
-  describe('accepting payments:', function () {
-
-    it('should fail if beneficiary is 0x0')
-    it('should fail if not a validPurchase')
-
-    it('should reject payments before start', async function () {
-     // await this.crowdsale.send(value).should.be.rejectedWith(EVMThrow)
-      await this.crowdsale.buyTokens(investor, {from: purchaser, value: value}).should.be.rejectedWith(EVMThrow)
-    })
-
-    it('should accept payments after start', async function () {
-      await increaseTimeTo(this.startTime)
-      await this.crowdsale.unpause()
-      await this.crowdsale.send(value).should.be.fulfilled
-      await this.crowdsale.buyTokens(investor, {value: value, from: purchaser}).should.be.fulfilled
-    })
-
-    it('should reject payments after end', async function () {
-      await increaseTimeTo(this.afterEndTime)
-      await this.crowdsale.send(value).should.be.rejectedWith(EVMThrow)
-      await this.crowdsale.buyTokens(investor, {value: value, from: purchaser}).should.be.rejectedWith(EVMThrow)
-    })
-
-  })
-
 
   describe('high-level purchase:', function () {
 
@@ -339,4 +328,28 @@ contract('Crowdsale', function ([owner, investor, wallet, purchaser, randomUser,
 
   })
 
+  describe('accepting payments:', function () {
+
+        it('should fail if beneficiary is 0x0')
+        it('should fail if not a validPurchase')
+
+        it('should reject payments before start', async function () {
+         // await this.crowdsale.send(value).should.be.rejectedWith(EVMThrow)
+          await this.crowdsale.buyTokens(investor, {from: purchaser, value: value}).should.be.rejectedWith(EVMThrow)
+        })
+
+        it('should accept payments after start', async function () {
+          await increaseTimeTo(this.startTime)
+          await this.crowdsale.unpause()
+          await this.crowdsale.send(value).should.be.fulfilled
+          await this.crowdsale.buyTokens(investor, {value: value, from: purchaser}).should.be.fulfilled
+        })
+
+        it('should reject payments after end', async function () {
+          await increaseTimeTo(this.afterEndTime)
+          await this.crowdsale.send(value).should.be.rejectedWith(EVMThrow)
+          await this.crowdsale.buyTokens(investor, {value: value, from: purchaser}).should.be.rejectedWith(EVMThrow)
+        })
+
+      })
 })

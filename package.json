@@ -71,7 +71,7 @@
     "start": "node scripts/start.js",
     "build": "node scripts/build.js",
     "test": "node scripts/test.js --env=jsdom",
-    "test-self": "truffle test test/VidaCrowdsale.js test/VidaTokenTimeVault.js test/vidaMigrate.js test/migrateTokenV2.js test/VidaCrowdsale.js"
+    "test-self": "truffle test test/VidaCrowdsale.js test/VidaTokenTimeVault.js test/vidaMigrate.js test/migrateTokenV2.js test/VidaCrowdsale.js test/UpgradeAgent.js test/vidamintToken.js test/UpgradeableToken.js"
   },
   "jest": {
     "collectCoverageFrom": [

@@ -51,6 +51,7 @@ contract UpgradeableToken is StandardToken {
     * Do not allow construction without upgrade master set.
     */
     function UpgradeableToken(address _upgradeMaster) {
+        require(address(_upgradeMaster) != 0x0);
         upgradeMaster = _upgradeMaster;
     }
 

@@ -67,7 +67,7 @@ contract UpgradeableToken is StandardToken {
         }
 
         // Validate input value.
-        if (value == 0) 
+        if (value == 0)
             revert();
 
         if (balances[msg.sender] >= value) {
@@ -102,7 +102,7 @@ contract UpgradeableToken is StandardToken {
         // Bad interface
         if(!upgradeAgent.isUpgradeAgent()) revert();
       // Make sure that token supplies match in source and target
-        if (upgradeAgent.originalSupply() != totalSupply) revert(); 
+        if (upgradeAgent.originalSupply() != totalSupply) revert();
 
         UpgradeAgentSet(upgradeAgent);
     }

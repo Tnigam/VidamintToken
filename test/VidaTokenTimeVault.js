@@ -13,27 +13,61 @@ const should = require('chai')
 
 const Crowdsale = artifacts.require('vidamintSale')
 const MintableToken = artifacts.require('MintableToken')
+const vidamintToken = artifacts.require('vidamintToken')
 const TokenVault = artifacts.require('TokenVault')
 
 contract('TokenVault:', function ([owner, investor, wallet, purchaser, randomUser]) {
 
+  const gas = 4700000
   const numTokens = 1
   const amount = new BigNumber(web3.toWei(numTokens))
   const rate = web3.toBigNumber(1)
   const value = ether(42)
   const cap = ether(300)
+  const tokensToBeAllocated = new BigNumber('9006e+18')
+  const tokenToBeMinted =  9006;
+  const freezeEndsAt = 1564556400;
+  const startTime = latestTime() + duration.weeks(1)
+  const endTime = startTime + duration.weeks(1)
+  const afterEndTime = endTime + duration.seconds(1)
 
   before(async function() {
     //Advance to the next block to correctly read time in the solidity "now" function interpreted by testrpc
      await advanceBlock()
   })
 
+
+
   describe('TokenVault Constructor:', () => {
-    it('should successfully create token vault')
-    it('should fail to create tokenVault if owner is set to zero')
-    it('should fail to create tokenVault if token address is not a standard token')
-    it('should fail to create tokenVault if freezeEndAt is not set')
-  }) //end of TokenVault Constructor
+    beforeEach(async function () {
+      this.startTime = latestTime() + duration.seconds(1);
+      this.endTime =   this.startTime + duration.weeks(1);
+      this.afterEndTime = this.endTime + duration.seconds(1)
+
+      this.crowdsale = await Crowdsale.new(owner, this.startTime, this.endTime, rate, cap, wallet)
+      await this.crowdsale.unpause()
+      this.token = vidamintToken.at(await this.crowdsale.token())
+
+      // this.releaseTime = latestTime() + duration.years(1)
+      // this.vidamintTokenVault = await TokenVault.new(owner,this.releaseTime,this.token.address, amount, {from: owner})
+    })
+
+    it('should successfully create token vault', async function() {
+      await TokenVault.new(owner, freezeEndsAt, this.token.address, tokensToBeAllocated, { gas, from: owner }).should.not.be.rejected
+    })
+    it('should fail to create tokenVault if owner is set to zero', async function() {
+      await TokenVault.new('0x0', freezeEndsAt, this.token.address, tokensToBeAllocated, { gas, from: owner }).should.be.rejected
+    })
+    it('should fail to create tokenVault if token address is not a standard token (maybe change to check if just 0x0)', async function() {
+      await TokenVault.new(owner, freezeEndsAt, '0x0', tokensToBeAllocated, { gas, from: owner }).should.be.rejected
+    })
+    it('should fail to create tokenVault if freezeEndAt is zero', async function() {
+      await TokenVault.new(owner, 0, this.token.address, tokensToBeAllocated, { gas, from: owner }).should.be.rejected
+    })
+    it('should fail to create tokenVault if tokensToBeAllocated is zero', async function() {
+      await TokenVault.new(owner, freezeEndsAt, this.token.address, 0, { gas, from: owner }).should.be.rejected
+    })
+  }) //end of TokenVault ConstructorŒ
 
   describe('Claiming tokens:', () => {
     beforeEach(async function () {
@@ -50,7 +84,7 @@ contract('TokenVault:', function ([owner, investor, wallet, purchaser, randomUse
 
       await this.vidamintTokenVault.setInvestor(investor, amount, {from: owner})
       await this.crowdsale.addToTokenVault(this.vidamintTokenVault.address, numTokens, {from:owner})
-      await this.vidamintTokenVault.lock({from: owner})
+      // await this.vidamintTokenVault.lock({from: owner})
 
       // debugger info
       // const tokensAllocatedTotal = await this.vidamintTokenVault.tokensAllocatedTotal.call()
@@ -73,18 +107,24 @@ contract('TokenVault:', function ([owner, investor, wallet, purchaser, randomUse
       // console.log('getState2 ' + getState2)
     })
 
-    it('should fail to cliam because vault has been locked')
+    it('should fail to cliam because vault has been locked', async function () {
+      await increaseTimeTo(this.releaseTime + duration.seconds(19))
+      await this.vidamintTokenVault.claim({from: investor}).should.be.rejected
+    })
 
     it('should fail to claim funds before freezeEnd time', async function () { // TODO: Augment test
+      await this.vidamintTokenVault.lock({from: owner})
       await this.vidamintTokenVault.claim({from: investor}).should.be.rejected
     })
 
     it('should fail to claim funds just before freezeEnd time', async function () { // TODO: Augment test
+      await this.vidamintTokenVault.lock({from: owner})
       await increaseTimeTo(this.releaseTime - duration.seconds(3))
       await this.vidamintTokenVault.claim({from: investor}).should.be.rejected
     })
 
     it('should fail claim funds for a randomUser not in balances', async function () {
+      await this.vidamintTokenVault.lock({from: owner})
       await increaseTimeTo(this.releaseTime + duration.seconds(19))
 
       let randomUserBalanceBefore = await this.token.balanceOf.call(randomUser)
@@ -97,6 +137,7 @@ contract('TokenVault:', function ([owner, investor, wallet, purchaser, randomUse
     })
 
     it('should succesfully allow user to claim funds after freezeEndAt time', async function () {
+      await this.vidamintTokenVault.lock({from: owner})
       await increaseTimeTo(this.releaseTime + duration.seconds(19))
 
       const balanceBefore = await this.vidamintTokenVault.balances.call(investor)
@@ -121,6 +162,7 @@ contract('TokenVault:', function ([owner, investor, wallet, purchaser, randomUse
     })
 
     it('should fail to allow investor to claim funds twice', async function () { // TODO: Augment test
+      await this.vidamintTokenVault.lock({from: owner})
       await increaseTimeTo(this.releaseTime + duration.years(1))
       await this.vidamintTokenVault.claim({from: investor}).should.be.fulfilled
       await this.vidamintTokenVault.claim({from: investor}).should.be.rejected

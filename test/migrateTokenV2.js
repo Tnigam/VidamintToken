@@ -13,7 +13,7 @@ const should = require('chai')
 
 const Crowdsale = artifacts.require('vidamintSale')
 const vidamintToken = artifacts.require('vidamintToken')
-const tokenVault = artifacts.require('TokenVault.sol')
+const tokenVault = artifacts.require('TokenVault')
 
 
 const gas = 4700000
@@ -266,6 +266,9 @@ contract('Migration V2:', function ([deployOwner, investor, wallet, purchaser]) 
       let balance = await this.token1.balanceOf.call(purchaser)
       console.log('purchaser Token1 Balance: before: ' + balance);
 
+      let b1 = await this.token1.balanceOf.call(this.tokenVault.address)
+      console.log('tokenCVault Token1 Balance: before: ' + b1);
+
       balance = await this.token2.balanceOf.call(purchaser)
       console.log('purchaser Token2 Balance: before: ' + balance);
 
@@ -275,6 +278,9 @@ contract('Migration V2:', function ([deployOwner, investor, wallet, purchaser]) 
 
       balance = await this.token1.balanceOf.call(purchaser)
       console.log('purchaser Token1 Balance: after: ' + balance);
+
+      let b2 = await this.token2.balanceOf.call(this.tokenVault.address)
+      console.log('tokenCVault Token2 Balance: after: ' + b2);
 
       balance = await this.token2.balanceOf.call(purchaser)
       console.log('purchaser Token2 Balance: after: ' + balance);

@@ -70,10 +70,108 @@ contract('UpgradeableToken:', function ([deployOwner, investor, wallet, purchase
   }) //end of UpgradeableToken constructor tests
 
   describe('upgrade:', () => {
-    it('should successfully upgrade a token')
-    it('should fail to upgrade token because state == WaitingForAgent') //  handles !(state == UpgradeState.ReadyToUpgrade || state == UpgradeState.Upgrading)
-    it('should fail if input value is equal to 0')
-    it('should fail if balance of msg.sender is 0')
+    beforeEach(async function () {
+      const rate = new BigNumber(1)
+      const value = ether(42)
+      const cap = ether(300)
+      const expectedTokenAmount = rate.mul(value)
+      this.tokensToBeAllocated = new BigNumber('9006e+18')
+      this.tokenToBeMinted =  9006;
+      this.freezeEndsAt = 1564556400;
+
+      this.startTime = latestTime() + duration.weeks(1)
+      this.endTime = this.startTime + duration.weeks(1)
+      this.afterEndTime = this.endTime + duration.seconds(1)
+      this.deployOwner = deployOwner
+
+      this.crowdsale = await Crowdsale.new(deployOwner, this.startTime, this.endTime, rate, cap, wallet)
+      const token1Addr = await this.crowdsale.token.call()
+      this.token1 = vidamintToken.at(token1Addr)
+      this.token2 = await vidamintToken.new() // TX
+    })
+
+    it('should successfully upgrade a token', async function () {
+      this.tokenVault = await tokenVault.new(deployOwner, this.freezeEndsAt, this.token1.address, this.tokensToBeAllocated, { gas, from: deployOwner }); // TX
+      await this.tokenVault.setInvestor(investor, this.tokensToBeAllocated, { gas, from: deployOwner }).should.not.be.rejected
+      await this.crowdsale.addToTokenVault(this.tokenVault.address, this.tokenToBeMinted, { gas, from: deployOwner }).should.not.be.rejected
+      await this.token2.vidamintTokenMigration(this.token1.address, { gas, from: deployOwner }).should.not.be.rejected
+      await this.crowdsale.changeTokenUpgradeMaster(deployOwner, { gas, from: deployOwner }).should.not.be.rejected
+      await this.token1.setUpgradeAgent(this.token2.address, { from: deployOwner }).should.not.be.rejected
+
+      let upgradeState = await this.token1.getUpgradeState.call()
+      upgradeState.should.be.bignumber.equal(3)
+
+      this.tkSupply = await this.token1.totalSupply.call()
+      await this.token1.upgrade(this.tkSupply, { from: deployOwner }).should.not.be.rejected
+
+      upgradeState = await this.token1.getUpgradeState.call()
+      upgradeState.should.be.bignumber.equal(4)
+    })
+
+    it('should fail to upgrade token because state == WaitingForAgent', async function () { //  handles !(state == UpgradeState.ReadyToUpgrade || state == UpgradeState.Upgrading)
+      this.tokenVault = await tokenVault.new(deployOwner, this.freezeEndsAt, this.token1.address, this.tokensToBeAllocated, { gas, from: deployOwner }); // TX
+      await this.tokenVault.setInvestor(investor, this.tokensToBeAllocated, { gas, from: deployOwner }).should.not.be.rejected
+      await this.crowdsale.addToTokenVault(this.tokenVault.address, this.tokenToBeMinted, { gas, from: deployOwner }).should.not.be.rejected
+      await this.token2.vidamintTokenMigration(this.token1.address, { gas, from: deployOwner }).should.not.be.rejected
+      await this.crowdsale.changeTokenUpgradeMaster(deployOwner, { gas, from: deployOwner }).should.not.be.rejected
+
+      let upgradeState = await this.token1.getUpgradeState.call()
+      upgradeState.should.be.bignumber.equal(2)
+
+      this.tkSupply = await this.token1.totalSupply.call()
+      await this.token1.upgrade(this.tkSupply, { from: deployOwner }).should.be.rejected
+
+      upgradeState = await this.token1.getUpgradeState.call()
+      upgradeState.should.be.bignumber.equal(2)
+    })
+
+    it('should fail if input value is equal to 0', async function () {
+      this.tokenVault = await tokenVault.new(deployOwner, this.freezeEndsAt, this.token1.address, this.tokensToBeAllocated, { gas, from: deployOwner }); // TX
+      await this.tokenVault.setInvestor(investor, this.tokensToBeAllocated, { gas, from: deployOwner }).should.not.be.rejected
+      await this.crowdsale.addToTokenVault(this.tokenVault.address, this.tokenToBeMinted, { gas, from: deployOwner }).should.not.be.rejected
+      await this.token2.vidamintTokenMigration(this.token1.address, { gas, from: deployOwner }).should.not.be.rejected
+      await this.crowdsale.changeTokenUpgradeMaster(deployOwner, { gas, from: deployOwner }).should.not.be.rejected
+      await this.token1.setUpgradeAgent(this.token2.address, { from: deployOwner }).should.not.be.rejected
+
+      let upgradeState = await this.token1.getUpgradeState.call()
+      upgradeState.should.be.bignumber.equal(3)
+
+      this.tkSupply = await this.token1.totalSupply.call()
+      await this.token1.upgrade(new BigNumber(0), { from: deployOwner }).should.be.rejected
+
+      upgradeState = await this.token1.getUpgradeState.call()
+      upgradeState.should.be.bignumber.equal(3)
+    })
+
+    it('should fail if balance of msg.sender is 0', async function () {
+      this.tokenVault = await tokenVault.new(deployOwner, this.freezeEndsAt, this.token1.address, this.tokensToBeAllocated, { gas, from: deployOwner }); // TX
+      await this.tokenVault.setInvestor(investor, this.tokensToBeAllocated, { gas, from: deployOwner }).should.not.be.rejected
+      await this.crowdsale.addToTokenVault(this.tokenVault.address, this.tokenToBeMinted, { gas, from: deployOwner }).should.not.be.rejected
+      await this.token2.vidamintTokenMigration(this.token1.address, { gas, from: deployOwner }).should.not.be.rejected
+      await this.crowdsale.changeTokenUpgradeMaster(deployOwner, { gas, from: deployOwner }).should.not.be.rejected
+      await this.token1.setUpgradeAgent(this.token2.address, { from: deployOwner }).should.not.be.rejected
+
+      let upgradeState = await this.token1.getUpgradeState.call()
+      upgradeState.should.be.bignumber.equal(3)
+
+      let balanceBeforT1 = await this.token1.balanceOf.call(randomUser)
+      balanceBeforT1.should.be.bignumber.equal(0)
+
+      let balanceBeforT2 = await this.token2.balanceOf.call(randomUser)
+      balanceBeforT2.should.be.bignumber.equal(0)
+
+      this.tkSupply = await this.token1.totalSupply.call()
+      await this.token1.upgrade(this.tkSupply, { from: randomUser }).should.be.rejected
+
+      let balanceAfterT1 = await this.token1.balanceOf.call(randomUser)
+      balanceAfterT1.should.be.bignumber.equal(0)
+
+      let balanceAfterT2 = await this.token2.balanceOf.call(randomUser)
+      balanceAfterT2.should.be.bignumber.equal(0)
+
+      upgradeState = await this.token1.getUpgradeState.call()
+      upgradeState.should.be.bignumber.equal(4)
+    })
     // it('should fail call upgradeFrom ')
   }) //end of UpgradeAgent tests
 

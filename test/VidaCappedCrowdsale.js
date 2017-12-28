@@ -19,7 +19,6 @@ contract('CappedCrowdsale', function ([_, wallet]) {
   const rate = new BigNumber(1)
 
   const cap = ether(300)
-  const goal = ether(100)
   const lessThanCap = ether(60)
 
   before(async function() {
@@ -32,7 +31,7 @@ contract('CappedCrowdsale', function ([_, wallet]) {
     this.endTime =   this.startTime + duration.weeks(1);
     this.owner ='0xdf08f82de32b8d460adbe8d72043e3a7e25a3b39';
 
-    this.crowdsale = await CappedCrowdsale.new(this.owner ,this.startTime, this.endTime, rate,goal, cap,wallet)
+    this.crowdsale = await CappedCrowdsale.new(this.owner ,this.startTime, this.endTime, rate, cap, wallet)
 
     this.token = MintableToken.at(await this.crowdsale.token())
   })
@@ -40,7 +39,7 @@ contract('CappedCrowdsale', function ([_, wallet]) {
   describe('creating a valid crowdsale', function () {
 
     it('should fail with zero cap', async function () {
-      await CappedCrowdsale.new(this.owner, this.startTime, this.endTime, rate, goal , 0, wallet).should.be.rejectedWith(EVMThrow);
+      await CappedCrowdsale.new(this.owner, this.startTime, this.endTime, rate, 0, wallet).should.be.rejectedWith(EVMThrow);
     })
 
   });
@@ -49,6 +48,7 @@ contract('CappedCrowdsale', function ([_, wallet]) {
 
     beforeEach(async function () {
       await increaseTimeTo(this.startTime)
+      await this.crowdsale.unpause()
     })
 
     it('should accept payments within cap', async function () {
@@ -71,6 +71,7 @@ contract('CappedCrowdsale', function ([_, wallet]) {
 
     beforeEach(async function () {
       await increaseTimeTo(this.startTime)
+      await this.crowdsale.unpause()
     })
 
     it('should not be ended if under cap', async function () {

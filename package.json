@@ -50,6 +50,7 @@
   },
   "dependencies": {
     "babel-register": "^6.26.0",
+    "bignumber.js": "^5.0.0",
     "bip39": "^2.4.0",
     "chai-as-promised": "^7.1.1",
     "chai-bignumber": "^2.0.1",
@@ -62,14 +63,15 @@
     "react-dom": "^15.4.2",
     "truffle-debugger": "^1.1.0",
     "truffle-hdwallet-provider": "0.0.3",
-    "web3": "^1.0.0-beta.24",
+    "web3": "0.18.4",
     "web3-provider-engine": "^13.3.3",
     "zeppelin-solidity": "^1.3.0"
   },
   "scripts": {
     "start": "node scripts/start.js",
     "build": "node scripts/build.js",
-    "test": "node scripts/test.js --env=jsdom"
+    "test": "node scripts/test.js --env=jsdom",
+    "test-self": "truffle test test/VidaCrowdsale.js test/VidaTokenTimeVault.js test/vidaMigrate.js test/migrateTokenV2.js test/VidaCrowdsale.js test/UpgradeAgent.js test/vidamintToken.js test/UpgradeableToken.js"
   },
   "jest": {
     "collectCoverageFrom": [

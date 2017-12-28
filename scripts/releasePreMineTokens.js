@@ -17,12 +17,12 @@ module.exports = function(deployer) {
   }
  
   const BigNumber = web3.BigNumber;
-  vidamintSale.at('0xfe01c6e21bb64b51ce9e888be7915dde0a5badf6').then(function(instance) {
+  vidamintSale.at('0xa7df1d30f6456dc72ce18fe011896105651a1f86').then(function(instance) {
     console.log('vidamintSale:' + instance.address);
     return instance.distributePreBuyersRewards(preBuyers,preBuyersTokens,{gas: 4700000});
   }).then(function(result) {
     // If this callback is called, the transaction was successfully processed.
-    console.log('result: '+ result)
+    console.log('result: '+ JSON.stringify(result,null,2))
   }).catch(function(e) {
     console.log(e)
     // There was an error! Handle it.

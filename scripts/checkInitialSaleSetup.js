@@ -8,7 +8,7 @@ const BigNumber = web3.BigNumber
  const should = require('chai')
   .use(require('chai-as-promised'))
   .use(require('chai-bignumber')(BigNumber))
-  .should() 
+  .should()
 
 module.exports = function(deployer) {
 
@@ -16,26 +16,26 @@ module.exports = function(deployer) {
 
 };
 async function Migrate(deployer) {
-       
-    this.vidamintSale = await vidamintSale.at('0x598010a0131b04416c68799c5e0aaf636403b647');
-    
-    
-    
+
+    this.vidamintSale = await vidamintSale.at('0xa11260b588429fcace882ffcda323531ad320271');
+
+    const weiToEth = 1000000000000000000
+
     const startTime = await this.vidamintSale.startTime.call();
     console.log('Sale Start Time ' + startTime);
-    
+
     const endTime = await this.vidamintSale.endTime.call();
     console.log('Sale End Time ' + endTime);
-    
+
     const rate = await this.vidamintSale.rate.call();
     console.log('Sale Initial rate ' + rate);
-    
+
     const cap = await this.vidamintSale.cap.call();
     console.log('Sale cap ' + cap.toFixed(0));
-    
+
     const wallet = await this.vidamintSale.wallet.call();
     console.log('Sale wallet ' + wallet);
-    
+
     const owner = await this.vidamintSale.owner.call();
     console.log('Sale owner ' + owner);
 
@@ -53,8 +53,17 @@ async function Migrate(deployer) {
     this.vidamintToken = vidamintToken.at(this.token);
 
     const totalSupply = await this.vidamintToken.totalSupply.call();
-    console.log('Token Total Supply ' + totalSupply.toFixed(0));
+    console.log('vidamintToken: Token Supply ' + totalSupply.dividedBy(weiToEth));
+
+    this.totalUpgraded = await this.vidamintToken.totalUpgraded.call();
+    console.log('vidamintToken: totalUpgraded ' + this.totalUpgraded.dividedBy(weiToEth));
+
+    const remainingToBeUpgraded = totalSupply.minus(this.totalUpgraded)
+    console.log(`Reamining to be updated: ${remainingToBeUpgraded.dividedBy(weiToEth)}`)
 
     const weiRaised = await this.vidamintSale.weiRaised.call();
     console.log('Total Wei Raised ' + weiRaised);
+
+    const upgradeState = await this.vidamintToken.getUpgradeState.call();
+    console.log('vidamintToken: upgradeState ' + upgradeState);
   }
